@@ -63,10 +63,11 @@ def partsys_search(df, classifier_dict, keylist, filename):
     word_list = []
     fr_list = ["" for _ in namelist]
     word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY']
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD']
 
     for n, i in enumerate(namelist):
-        name = re.sub(r"[0-9]", ' ', re.sub(r"\xa0", ' ', re.sub(r"\u3000", ' ', re.sub("\n", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', i))))))
+        name = re.sub(r"[0-9]", ' ', re.sub(r"\xa0", ' ', re.sub(r"\u3000", ' ', re.sub("\n", ' ', re.sub(
+            "1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', i)))))))
         words = [i for i in name.replace("-", " ").replace("+", " ").replace("_", " ").replace(
             ",", " ").replace("(", " ").replace(")", " ").replace("=", " ").replace(".", "").replace(
             " & ", "&").split(' ') if i not in word_to_skip and len(i) > 1]
