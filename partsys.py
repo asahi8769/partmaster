@@ -148,8 +148,9 @@ def partsys_search(df, classifier_dict, keylist, filename):
     # print(Counter(df['기준1']))
     # print(Counter(df['정리']))
 
+    if filename == "품목구분_2_test":
+        df.drop_duplicates(subset=['품명단어'], keep='first', inplace=True)
     df.drop_duplicates(subset=['품번'], keep='first', inplace=True)
-    df.drop_duplicates(subset=['품명단어'], keep='first', inplace=True)
     df = df[['품번', '품명', '품명단어', '리어프론트', '기준1', '기준2', '정리', '사정결과', '부품체계_1', '부품체계_2', ]]
 
     with pd.ExcelWriter(rf'files\{filename}.xlsx') as writer:
@@ -182,9 +183,9 @@ def appearance_table():
         df.to_excel(writer, sheet_name='불량구분_원본', index=True)
 
 if __name__ == "__main__":
-    df = dom_data()
-    # df = exp_data()
+    # df = dom_data()
+    df = exp_data()
     classifier_dict, keylist = revised_data()
-    partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
-    # partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
+    # partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
+    partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
     # appearance_table()
