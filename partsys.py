@@ -114,7 +114,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
             for key in keylist:
                 k_set = set(key.split(', ')[1:])
                 i_set = set(i.split(', ')[1:])
-                if k_set.issuperset(i_set) and i.split(', ')[0] == key.split(', ')[0]:
+                if (k_set.issuperset(i_set) or k_set.issuperset(i_set)) and i.split(', ')[0] == key.split(', ')[0]:
                     audited[n] = classifier_dict[key]['정리'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
