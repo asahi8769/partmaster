@@ -62,11 +62,14 @@ def partsys_search(df, classifier_dict, keylist, filename):
     namelist = df['품명'].tolist()
     word_list = []
     fr_list = ["" for _ in namelist]
+
     word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
                     'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL']
 
     for n, i in enumerate(namelist):
-        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', i))))
+
+        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', re.sub("[0-9]WD", ' ', i)))))
+
         words = [i for i in name.replace("O-R", "OR").replace("-", " ").replace("+", " ").replace("_", " ").replace(
             ",", " ").replace("(", " ").replace(")", " ").replace("=", " ").replace(".", "").replace(
             " & ", "&").split(' ') if i not in word_to_skip and len(i) > 1]
@@ -99,6 +102,38 @@ def partsys_search(df, classifier_dict, keylist, filename):
                     break
         if audited[n] == "":
             for key in keylist:
+                if set(key.split(', ')) == set(i.split(', ')):
+                    audited[n] = classifier_dict[key]['정리'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
+                        classifier_dict[key]['정리']
+                    class_1[n] = classifier_dict[key]['기준1']
+                    class_2[n] = classifier_dict[key]['기준2']
+                    length[n] = classifier_dict[key]['품명길이']
+                    stage[n] = '[2]역순'
+                    break
+        if audited[n] == "":
+            for key in keylist:
+                if len(key.split(', '))>=3 and len(i.split(', '))>=3 and set(key.split(', ')[0:3]) == set(i.split(', ')[0:3]):
+                    # print(key, '&', i)
+                    audited[n] = classifier_dict[key]['정리'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
+                        classifier_dict[key]['정리']
+                    class_1[n] = classifier_dict[key]['기준1']
+                    class_2[n] = classifier_dict[key]['기준2']
+                    length[n] = classifier_dict[key]['품명길이']
+                    stage[n] = '[3]부분_3'
+                    break
+        if audited[n] == "":
+            for key in keylist:
+                if len(key.split(', '))>=2 and len(i.split(', '))>=2 and key.split(', ')[0:2] == i.split(', ')[0:2]:
+                    # print(key, '&', i)
+                    audited[n] = classifier_dict[key]['정리'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
+                        classifier_dict[key]['정리']
+                    class_1[n] = classifier_dict[key]['기준1']
+                    class_2[n] = classifier_dict[key]['기준2']
+                    length[n] = classifier_dict[key]['품명길이']
+                    stage[n] = '[4]부분_2'
+                    break
+        if audited[n] == "":
+            for key in keylist:
                 k_str = ', '.join(key.split(', ')[1:])
                 i_str = ', '.join(i.split(', ')[1:])
                 if (k_str in i_str or i_str in k_str) and i.split(', ')[0] == key.split(', ')[0]:
@@ -108,7 +143,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
                     length[n] = classifier_dict[key]['품명길이']
-                    stage[n] = '[2]포함'
+                    stage[n] = '[5]포함'
                     break
         if audited[n] == "":
             for key in keylist:
@@ -120,17 +155,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
                     length[n] = classifier_dict[key]['품명길이']
-                    stage[n] = '[3]부분'
-                    break
-        if audited[n] == "":
-            for key in keylist:
-                if sorted(key.split(', ')) == sorted(i.split(', ')):
-                    audited[n] = classifier_dict[key]['정리'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
-                        classifier_dict[key]['정리']
-                    class_1[n] = classifier_dict[key]['기준1']
-                    class_2[n] = classifier_dict[key]['기준2']
-                    length[n] = classifier_dict[key]['품명길이']
-                    stage[n] = '[4]역순'
+                    stage[n] = '[6]교차'
                     break
         if audited[n] == "":
             for key in keylist:
@@ -139,7 +164,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
                         classifier_dict[key]['기준1']
                     class_1[n] = classifier_dict[key]['기준1']
                     length[n] = classifier_dict[key]['품명길이']
-                    stage[n] = '[5]대표'
+                    stage[n] = '[7]대표'
                     break
     df['품명길이'] = length
     df['기준1'] = class_1
