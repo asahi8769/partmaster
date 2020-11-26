@@ -63,12 +63,11 @@ def partsys_search(df, classifier_dict, keylist, filename):
     word_list = []
     fr_list = ["" for _ in namelist]
     word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD']
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE']
 
     for n, i in enumerate(namelist):
-        name = re.sub(r"[0-9]", ' ', re.sub(r"\xa0", ' ', re.sub(r"\u3000", ' ', re.sub("\n", ' ', re.sub(
-            "1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', i)))))))
-        words = [i for i in name.replace("-", " ").replace("+", " ").replace("_", " ").replace(
+        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', i))))
+        words = [i for i in name.replace("O-R", "OR").replace("-", " ").replace("+", " ").replace("_", " ").replace(
             ",", " ").replace("(", " ").replace(")", " ").replace("=", " ").replace(".", "").replace(
             " & ", "&").split(' ') if i not in word_to_skip and len(i) > 1]
         word_list.append(words)
@@ -147,7 +146,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
 
     print(Counter(df['사정결과']))
     # print(Counter(df['기준1']))
-    # print(Counter(df['정리']))
+    print(Counter(df['정리']))
 
     if filename == "품목구분_2_test":
         df.drop_duplicates(subset=['품명단어'], keep='first', inplace=True)
@@ -159,9 +158,9 @@ def partsys_search(df, classifier_dict, keylist, filename):
     os.startfile(rf'files\{filename}.xlsx')
 
 
-def revised_data():
+def partsys_3():
     with open('files/품목구분기준.xlsx', 'rb') as file:
-        df = pd.read_excel(file)
+        df = pd.read_excel(file, sheet_name='부품체계3')
         df.fillna('', inplace=True)
         df['품명길이'] = [len(df['품명단어'].tolist()[n].split(', ')) for n in range(len(df))]
         df.sort_values("품명길이", inplace=True, ascending=False)
@@ -184,9 +183,9 @@ def appearance_table():
         df.to_excel(writer, sheet_name='불량구분_원본', index=True)
 
 if __name__ == "__main__":
-    # df = dom_data()
-    df = exp_data()
-    classifier_dict, keylist = revised_data()
-    # partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
-    partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
+    df = dom_data()
+    # df = exp_data()
+    classifier_dict, keylist = partsys_3()
+    partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
+    # partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
     # appearance_table()
