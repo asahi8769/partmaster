@@ -68,7 +68,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
 
     for n, i in enumerate(namelist):
 
-        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("1ST", ' ', re.sub("2ND", ' ', re.sub("3RD", ' ', re.sub("[0-9]WD", ' ', i)))))
+        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("[0-9][A-Z]{2}", ' ', re.sub("(NO)(\.)[0-9]", ' ', re.sub("(O2)", 'OXYGEN', i))))
 
         words = [i for i in name.replace("O-R", "OR").replace("-", " ").replace("+", " ").replace("_", " ").replace(
             ",", " ").replace("(", " ").replace(")", " ").replace("=", " ").replace(".", "").replace(
