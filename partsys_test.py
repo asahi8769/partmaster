@@ -59,17 +59,18 @@ def partsys_2():
 
 def partsys_search(df, classifier_dict, keylist, filename):
     # keylist = df['품명단어'].tolist()
-    print(filename)
+    # print(filename)
     namelist = [i.upper() for i in df['품명'].tolist()]
     word_list = []
     fr_list = ["" for _ in namelist]
 
     word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY']
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL',
+                    'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
 
     for n, i in enumerate(namelist):
 
-        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}[\s,.\-_]", ' ', re.sub(
+        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}[\s,.\-_]{0,1}", ' ', re.sub(
             "(NO)(\.)[0-9]+", ' ', re.sub("(O2)", 'OXYGEN', i))))
 
         words = [i for i in name.replace("O-R", "OR").replace(".", "").replace(" & ", "&").replace("'", "").split(
@@ -224,6 +225,7 @@ if __name__ == "__main__":
     df = dom_data()
     # df = exp_data()
     classifier_dict, keylist = partsys_3()
-    partsys_search(df, classifier_dict, keylist, '품목구분_master_test')
+    partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
+    # partsys_search(df, classifier_dict, keylist, '품목구분_master_test')
     # partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
     # appearance_table()
