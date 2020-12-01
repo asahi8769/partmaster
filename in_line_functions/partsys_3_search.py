@@ -24,7 +24,7 @@ def preprocess(df, namelist):
     word_list = []
 
     for n, i in enumerate(namelist):
-        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}[$\s,.\-_]", ' ', re.sub(
+        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}($|[\s,.\-_|])", ' ', re.sub(
             "(NO)(\.)[0-9]+", ' ', re.sub("(O2)", 'OXYGEN', i))))
 
         words = [i for i in name.replace("O-R", "OR").replace(".", "").replace(" & ", "&").replace("'", "").split(
