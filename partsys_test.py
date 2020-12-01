@@ -58,21 +58,22 @@ def partsys_2():
 
 
 def partsys_search(df, classifier_dict, keylist, filename):
-    # syslist = df['품목'].tolist()
-    namelist = df['품명'].tolist()
+    # keylist = df['품명단어'].tolist()
+    print(filename)
+    namelist = [i.upper() for i in df['품명'].tolist()]
     word_list = []
     fr_list = ["" for _ in namelist]
 
     word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL']
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY']
 
     for n, i in enumerate(namelist):
 
-        name = re.sub(r"[0-9\xa0\u3000\n]", ' ', re.sub("[0-9][A-Z]{2}", ' ', re.sub("(NO)(\.)[0-9]", ' ', re.sub("(O2)", 'OXYGEN', i))))
+        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}[\s,.\-_]", ' ', re.sub(
+            "(NO)(\.)[0-9]+", ' ', re.sub("(O2)", 'OXYGEN', i))))
 
-        words = [i for i in name.replace("O-R", "OR").replace("-", " ").replace("+", " ").replace("_", " ").replace(
-            ",", " ").replace("(", " ").replace(")", " ").replace("=", " ").replace(".", "").replace(
-            " & ", "&").split(' ') if i not in word_to_skip and len(i) > 1]
+        words = [i for i in name.replace("O-R", "OR").replace(".", "").replace(" & ", "&").replace("'", "").split(
+            ' ') if i not in word_to_skip and len(i) > 1]
         word_list.append(words)
 
     for n, i in enumerate(namelist):
@@ -199,11 +200,12 @@ def partsys_3():
         df.fillna('', inplace=True)
         df['품명길이'] = [len(df['품명단어'].tolist()[n].split(', ')) for n in range(len(df))]
         df.sort_values("품명길이", inplace=True, ascending=False)
+        keylist = df['품명단어'].tolist()
 
-    keylist = df['품명단어'].tolist()
-    classifier_dict = {i: {'품명길이': len(df['품명단어'].tolist()[n].split(', ')), '기준1': df['기준1'].tolist()[n],
+
+    classifier_dict = {i: {'품명길이': df['품명길이'].tolist()[n], '기준1': df['기준1'].tolist()[n],
                            '기준2': df['기준2'].tolist()[n], '정리': df['정리'].tolist()[n]}
-                       for n, i in enumerate(df['품명단어'].tolist())}
+                       for n, i in enumerate(keylist)}
     return classifier_dict, keylist
 
 
@@ -218,9 +220,10 @@ def appearance_table():
         df.to_excel(writer, sheet_name='불량구분_원본', index=True)
 
 if __name__ == "__main__":
+    # df = master_data()
     df = dom_data()
     # df = exp_data()
     classifier_dict, keylist = partsys_3()
-    partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
+    partsys_search(df, classifier_dict, keylist, '품목구분_master_test')
     # partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
     # appearance_table()

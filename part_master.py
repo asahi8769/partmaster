@@ -1,9 +1,10 @@
 from master_db import MasterDBStorage
-from utils.functions import show_elapsed_time, local_function_get_part_sys_3
+from utils.functions import show_elapsed_time
 import pandas as pd
 import warnings, os
 from collections import Counter
-from utils.config import APPEARANCE_DICT, PART_SYS_1, PACKAGING_CENTER
+from utils.config import APPEARANCE_DICT, PACKAGING_CENTER
+from in_line_functions.partsys_3_search import partsys_3_search
 
 
 class DomeMaster:
@@ -22,8 +23,9 @@ class DomeMaster:
             self.dom_insp_df['제목_정리'] = self.prob_specify(self.dom_insp_df)
         if self.type == 'exp':
             self.exp_insp_df = MasterDBStorage('해외불량이력').df
-            self.exp_insp_df = self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
+            self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
             self.exp_insp_df['제목_정리'] = self.prob_specify(self.exp_insp_df)
+
         self.in_business_df = MasterDBStorage('매입대').df
         self.part_sys_2_df = MasterDBStorage('품번체계').df
         self.packingspect_df = MasterDBStorage('전차종포장사양서').df
@@ -60,79 +62,21 @@ class DomeMaster:
     def packaging_center(self):
         self.master_df['포장장명'] = [PACKAGING_CENTER.get(i, '') for i in self.master_df['포장장'].tolist()]
 
+    @staticmethod
     @show_elapsed_time
-    def part_type_1(self, df):
-        df['부품체계_1'] = [PART_SYS_1.get(i[0], '') for i in df['Part No'].tolist()]
+    def part_type_1_2(df):
+        with open('files/품목구분기준.xlsx', 'rb') as file:
+            df_1 = pd.read_excel(file, sheet_name='부품체계1')
+            df_2 = pd.read_excel(file, sheet_name='부품체계2')
+        partsys_1_dict = dict(zip([str(i) for i in df_1['품번'].tolist()], df_1['부품구분']))
+        partsys_2_dict = {str(p): df_2['부품구분'].tolist()[n] for n, p in enumerate(df_2['품번'].tolist())}
+        df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
+        df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
 
+    @staticmethod
     @show_elapsed_time
-    def part_type_2(self, df):
-        PART_SYS_2 = {p: self.part_sys_2_df['부품구분'].tolist()[n] for n, p in enumerate(self.part_sys_2_df['품번'].tolist())}
-        df['부품체계_2'] = [PART_SYS_2.get(i[:2], '') for i in df['Part No'].tolist()]
-
-    @show_elapsed_time
-    def part_type_3(self, df):
-        PART_SYS_3 = local_function_get_part_sys_3()
-        names_list = df['부품명'].tolist()
-        partsys_list = ["" for _ in range(len(names_list))]
-        partname_list = [i.upper() for i in df['부품명'].tolist()]
-
-        for n, name in enumerate(partname_list):
-            for key in PART_SYS_3.keys():
-
-                if partsys_list[n] == "" and key == name:
-                    partsys_list[n] = PART_SYS_3[key]
-                    break
-
-                if partsys_list[n] == "" and ',' in str(key):
-                    name_revised = name.replace("-", " ").replace(",", " ").replace("_", " ").replace("&", " ").replace("(", " ").replace(")", " ").split(" ")
-                    if set([i.replace(" ", "") for i in key.split(',')]).issubset(name_revised):
-                        partsys_list[n] = PART_SYS_3[key]
-                        break
-
-                if partsys_list[n] == "" and name.startswith(key):
-                    partsys_list[n] = PART_SYS_3[key]
-                    break
-
-        for n, name in enumerate(partname_list):
-            for key in PART_SYS_3.keys():
-                if partsys_list[n] != "":
-                    break
-                else:
-                    name_revised = name.replace(" ", "")
-                    if partsys_list[n] == "" and '-' in name_revised:
-                        for nth_word in range(len(name_revised.split('-'))):
-                            if key == name_revised.split('-')[nth_word]:
-                                partsys_list[n] = PART_SYS_3[key]
-                                break
-                    if partsys_list[n] == "" and '_' in name_revised:
-                        for nth_word in range(len(name_revised.split('_'))):
-                            if key == name_revised.split('_')[nth_word]:
-                                partsys_list[n] = PART_SYS_3[key]
-                                break
-                    if partsys_list[n] == "" and '&' in name_revised:
-                        for nth_word in range(len(name_revised.split('&'))):
-                            if key == name_revised.split('&')[nth_word]:
-                                partsys_list[n] = PART_SYS_3[key]
-                                break
-                    name_revised = name.replace(",", " ")
-                    if partsys_list[n] == "" and ' ' in name_revised:
-                        for nth_word in range(len(name_revised.split(' '))):
-                            if key == name_revised.split(' ')[nth_word]:
-                                partsys_list[n] = PART_SYS_3[key]
-                                break
-
-        for n, name in enumerate(partname_list):
-            for key in PART_SYS_3.keys():
-                if partsys_list[n] == "" and key in name:
-                    partsys_list[n] = PART_SYS_3[key]
-                    break
-
-        # print(Counter(partsys_list), Counter(partsys_list)[""]/len(partsys_list))
-        df['부품체계_3'] = partsys_list
-
-    @show_elapsed_time
-    def part_type_4(self, df):
-        df['부품체계_4'] = df['부품체계_3']+"_"+df['Part No'].str.slice(0, 3)
+    def part_type_3(df):
+        partsys_3_search(df)
 
     @show_elapsed_time
     def inspection_binary(self):
@@ -277,34 +221,31 @@ class DomeMaster:
         obj.inspection_binary()
         obj.business_binary()
 
-        obj.part_type_1(obj.master_df)
-        obj.part_type_2(obj.master_df)
+        obj.part_type_1_2(obj.master_df)
         obj.part_type_3(obj.master_df)
-        obj.part_type_4(obj.master_df)
+        # obj.part_type_4(obj.master_df)
 
-        if obj.type == 'dom':
-            obj.dom_prob_type()
-            obj.dom_frequency()
-            obj.dom_amount()
-            obj.appearance_type(obj.dom_insp_df)
-            obj.part_type_1(obj.dom_insp_df)
-            obj.part_type_2(obj.dom_insp_df)
-            obj.part_type_3(obj.dom_insp_df)
-            obj.part_type_4(obj.dom_insp_df)
+        # if obj.type == 'dom':
+        #     obj.dom_prob_type()
+        #     obj.dom_frequency()
+        #     obj.dom_amount()
+        #     obj.appearance_type(obj.dom_insp_df)
+        #     obj.part_type_1_2(obj.dom_insp_df)
+        #     obj.part_type_3(obj.dom_insp_df)
+        #     obj.part_type_4(obj.dom_insp_df)
+        #
+        #     obj.spawn(obj.dom_insp_df, obj.type)
 
-            obj.spawn(obj.dom_insp_df, obj.type)
-
-        if obj.type == 'exp':
-            obj.exp_prob_type()
-            obj.exp_frequency()
-            obj.exp_amount()
-            obj.appearance_type(obj.exp_insp_df)
-            obj.part_type_1(obj.exp_insp_df)
-            obj.part_type_2(obj.exp_insp_df)
-            obj.part_type_3(obj.exp_insp_df)
-            obj.part_type_4(obj.exp_insp_df)
-
-            obj.spawn(obj.exp_insp_df, obj.type)
+        # if obj.type == 'exp':
+        #     obj.exp_prob_type()
+        #     obj.exp_frequency()
+        #     obj.exp_amount()
+        #     obj.appearance_type(obj.exp_insp_df)
+        #     obj.part_type_1_2(obj.exp_insp_df)
+        #     obj.part_type_3(obj.exp_insp_df)
+        #     obj.part_type_4(obj.exp_insp_df)
+        #
+        #     obj.spawn(obj.exp_insp_df, obj.type)
 
         obj.spawn(obj.master_df)
 
@@ -322,4 +263,4 @@ class DomeMaster:
 
 if __name__ == "__main__":
     DomeMaster.run(d_type='exp')
-    DomeMaster.run(d_type='dom')
+    # DomeMaster.run(d_type='dom')
