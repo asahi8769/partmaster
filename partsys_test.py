@@ -62,13 +62,15 @@ def partsys_search(df, classifier_dict, keylist, filename):
     word_list = []
     fr_list = ["" for _ in namelist]
 
-    words_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY',
-                     'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
+    words_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', 'LHD', 'RHD', 'CKD', 'L/R', 'ASSEMBLY', 'STD', 'BUS'
+                     'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T',
+                     'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE', 'QY', 'SPORTAGE', 'SONATA', 'LF', 'ACCENT', 'HYUNDAI', 'KIA',
+                     'RIO', 'TUCSON', 'SOLATI', 'KD', 'ASM', 'TL/QL', 'CEED', 'FORTE', 'LIMITED', 'CRETA', 'SANTAFE',
+                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR']
 
     for n, i in enumerate(namelist):
 
-        name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace(".", "")
+        name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace("`", "").replace(".", "")
         name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', name)
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
@@ -178,7 +180,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
 
     print(Counter(df['사정결과']))
     # print(Counter(df['기준1']))
-    print(Counter(df['정리']))
+    # print(Counter(df['정리']))
 
     if filename == "품목구분_2_test":
         df.drop_duplicates(subset=['품명단어'], keep='first', inplace=True)

@@ -10,3 +10,5 @@ print(name)
 
 a = "1 31  2"
 print(a.split(" "))
+
+print("HDL-RR DR O/S,LH".replace("RR", ""))
