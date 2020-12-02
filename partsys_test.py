@@ -58,29 +58,24 @@ def partsys_2():
 
 
 def partsys_search(df, classifier_dict, keylist, filename):
-    # keylist = df['품명단어'].tolist()
-    # print(filename)
     namelist = [i.upper() for i in df['품명'].tolist()]
     word_list = []
     fr_list = ["" for _ in namelist]
 
-    word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL',
-                    'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
+    words_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY',
+                     'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
 
     for n, i in enumerate(namelist):
 
-        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}($|[\s,.\-_|])", ' ', re.sub(
-            "(NO)(\.)[0-9]+", ' ', re.sub("(O2)", 'OXYGEN', i))))
-
-        words = [i for i in name.replace("O-R", "OR").replace(".", "").replace(" & ", "&").replace("'", "").split(
-            ' ') if i not in word_to_skip and len(i) > 1]
+        name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace(".", "")
+        name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', name)
+        words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
 
-    for n, i in enumerate(namelist):
         if 'FR' in i or 'FRONT' in i or 'FRT' in i:
             fr_list[n] = 'FR'
-        if 'RR' in i or 'REAR' in i:
+        elif 'RR' in i or 'REAR' in i:
             fr_list[n] = 'RR'
 
     df['품명단어'] = [', '.join(i) for i in word_list]

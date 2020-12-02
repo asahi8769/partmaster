@@ -18,38 +18,35 @@ def part_type_3_dict():
 
 
 def preprocess(df, namelist):
-    word_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', "ASS'Y", 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
-                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL',
-                    'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
+    words_to_skip = ['RH', 'LH', 'ASSY', 'NO', 'A/S', 'ASY', 'FR', 'RR', 'FRONT', 'REAR', 'LHD', 'RHD', 'P/SIDE',
+                    'D/SIDE', 'CKD', 'NO.', 'L/R', 'FRT', 'ASSEMBLY', 'STD', 'STDB', 'COMPLETE', 'COMPL', 'ASSSY',
+                     'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T', 'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE']
+
     word_list = []
-
-    for n, i in enumerate(namelist):
-        name = re.sub("[0-9\xa0\u3000\n?!\-+_,()=]", ' ', re.sub("[0-9][A-Z]{2}($|[\s,.\-_|])", ' ', re.sub(
-            "(NO)(\.)[0-9]+", ' ', re.sub("(O2)", 'OXYGEN', i))))
-
-        words = [i for i in name.replace("O-R", "OR").replace(".", "").replace(" & ", "&").replace("'", "").split(
-            ' ') if i not in word_to_skip and len(i) > 1]
-
-        word_list.append(words)
-    df['품명단어'] = [', '.join(i) for i in word_list]
-
-
-def fr_process(df, namelist):
     fr_list = ["" for _ in namelist]
+
     for n, i in enumerate(namelist):
+
+        name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace(".", "")
+        name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', name)
+        words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
+        word_list.append(words)
+
         if 'FR' in i or 'FRONT' in i or 'FRT' in i:
             fr_list[n] = 'FR'
-        if 'RR' in i or 'REAR' in i:
+        elif 'RR' in i or 'REAR' in i:
             fr_list[n] = 'RR'
+
+    df['품명단어'] = [', '.join(i) for i in word_list]
     df['리어프론트'] = fr_list
-    return fr_list
 
 
 def partsys_3_search(df):
-    classifier_dict, key_sequence = part_type_3_dict
+    classifier_dict, key_sequence = part_type_3_dict()
     namelist = [i.upper() for i in df['부품명'].tolist()]
     preprocess(df, namelist)
-    fr_list = fr_process(df, namelist)
+
+    fr_list = df['리어프론트'].tolist()
 
     audited = ["" for _ in namelist]
     class_1 = ["" for _ in namelist]
@@ -57,7 +54,7 @@ def partsys_3_search(df):
     length_ = ["" for _ in namelist]
     stage__ = ["" for _ in namelist]
     for n, i in enumerate(df['품명단어'].tolist()):
-        if n % 1000 == 0: print(n)
+        # if n % 1000 == 0: print(n)
         if audited[n] == "":
             for key in key_sequence:
                 if key == i:
