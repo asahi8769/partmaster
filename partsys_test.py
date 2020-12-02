@@ -189,7 +189,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
 
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
         df.to_excel(writer, sheet_name='품번체계', index=False)
-    os.startfile(rf'files\{filename}.xlsx')
+    os.startfile(rf'files\spawn\{filename}.xlsx')
 
 
 def partsys_3():
@@ -199,7 +199,6 @@ def partsys_3():
         df['품명길이'] = [len(df['품명단어'].tolist()[n].split(', ')) for n in range(len(df))]
         df.sort_values("품명길이", inplace=True, ascending=False)
         keylist = df['품명단어'].tolist()
-
 
     classifier_dict = {i: {'품명길이': df['품명길이'].tolist()[n], '기준1': df['기준1'].tolist()[n],
                            '기준2': df['기준2'].tolist()[n], '정리': df['정리'].tolist()[n]}
@@ -214,7 +213,7 @@ def appearance_table():
     # print(values)
     df = pd.DataFrame(list(zip(key, values)), columns =['불량명', '단어'])
     # print(df)
-    with pd.ExcelWriter('files\불량구분테이블.xlsx') as writer:
+    with pd.ExcelWriter('files/불량구분테이블.xlsx') as writer:
         df.to_excel(writer, sheet_name='불량구분_원본', index=True)
 
 if __name__ == "__main__":
