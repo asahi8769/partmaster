@@ -187,7 +187,7 @@ def partsys_search(df, classifier_dict, keylist, filename):
     df.drop_duplicates(subset=['품번'], keep='first', inplace=True)
     df = df[['품번', '품명', '품명단어', '리어프론트', '기준1', '기준2', '정리', '사정결과', '부품체계_1', '부품체계_2', ]]
 
-    with pd.ExcelWriter(rf'files\{filename}.xlsx') as writer:
+    with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
         df.to_excel(writer, sheet_name='품번체계', index=False)
     os.startfile(rf'files\{filename}.xlsx')
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     df = dom_data()
     # df = exp_data()
     classifier_dict, keylist = partsys_3()
-    partsys_search(df, classifier_dict, keylist, '품목구분_2_test')
-    # partsys_search(df, classifier_dict, keylist, '품목구분_master_test')
+    partsys_search(df, classifier_dict, keylist, '품목구분결과_test')
+    # partsys_search(df, classifier_dict, keylist, '품목구분결과_master_test')
     # partsys_search(df, classifier_dict, keylist, '해외불량품목_5년')
     # appearance_table()

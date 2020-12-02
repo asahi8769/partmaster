@@ -5,15 +5,9 @@ __pycache__
 \clone_*/
 
 files/*
-!files/품목구분.xlsx
-!files/품번체계.xlsx
-!files/해외불량이력.xlsx
-!files/매입대.xlsx
-!files/중점검사표.xlsx
-!files/해외누적_김기륜.xlsx
-!files/해외불량품목_5년.xlsx
+!files/spawn
 !files/품목구분기준.xlsx
-!files/품목구분_2_test.xlsx
+
 
 
 
