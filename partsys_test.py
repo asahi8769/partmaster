@@ -177,7 +177,6 @@ def partsys_search(df, classifier_dict, keylist, filename):
     df['부품체계_1'] = [PART_SYS_1.get(i[0], '') for i in df['품번'].tolist()]
     df['부품체계_2'] = [PART_SYS_2.get(i[0:2], '') for i in df['품번'].tolist()]
 
-
     print(Counter(df['사정결과']))
     # print(Counter(df['기준1']))
     # print(Counter(df['정리']))
