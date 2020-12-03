@@ -9,6 +9,8 @@ files/*
 !files/품목구분기준.xlsx
 !files/불량유형수기정리.xlsx
 
+partsys_test.py
+
 
 
 
