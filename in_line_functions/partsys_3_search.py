@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+from collections import Counter
 
 
 def part_type_3_dict():
@@ -24,7 +25,7 @@ def preprocess(df, namelist):
                      'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T',
                      'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE', 'QY', 'SPORTAGE', 'SONATA', 'LF', 'ACCENT', 'HYUNDAI', 'KIA',
                      'RIO', 'TUCSON', 'SOLATI', 'KD', 'ASM', 'TL/QL', 'CEED', 'FORTE', 'LIMITED', 'CRETA', 'SANTAFE',
-                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR']
+                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT']
 
     for n, i in enumerate(namelist):
         name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace("`", "").replace(".", "")
@@ -54,7 +55,7 @@ def partsys_3_search(df):
     length_ = ["" for _ in namelist]
     stage__ = ["" for _ in namelist]
     for n, i in enumerate(df['품명단어'].tolist()):
-        # if n % 1000 == 0: print(n)
+        if n % 1000 == 0: print(n)
         if audited[n] == "":
             for key in key_sequence:
                 if key == i:
@@ -137,3 +138,57 @@ def partsys_3_search(df):
     df['기준2'] = class_2
     df['부품체계_3'] = audited
     df['사정결과'] = stage__
+
+    print(Counter(df['사정결과']))
+    # print(Counter(df['기준1']))
+    # print(Counter(df['정리']))
+
+if __name__ == "__main__":
+    from master_db import MasterDBStorage
+    import os
+
+    os.chdir(os.pardir)
+    print("Current working directory: {0}".format(os.getcwd()))
+
+    def master_data():
+        df = MasterDBStorage('파트마스터').df
+        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        df.drop_duplicates(subset="품번", keep='first', inplace=True)
+        df.drop_duplicates(subset="품명", keep='first', inplace=True)
+        return df
+
+
+    def exp_data():
+        df = MasterDBStorage('해외불량이력').df
+        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
+        df.drop_duplicates(subset="Part No", keep='first', inplace=True)
+        df.drop_duplicates(subset="부품명", keep='first', inplace=True)
+        return df
+
+
+    def dom_data():
+        df = MasterDBStorage('입고불량이력').df
+        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        return df
+
+    # df = master_data()
+    # df = dom_data()
+    df = exp_data()
+    classifier_dict, keylist = part_type_3_dict()
+    partsys_3_search(df)
+
+    with open('files/품목구분기준.xlsx', 'rb') as file:
+        df_1 = pd.read_excel(file, sheet_name='부품체계1')
+        df_2 = pd.read_excel(file, sheet_name='부품체계2')
+    partsys_1_dict = dict(zip([str(i) for i in df_1['품번'].tolist()], df_1['부품구분']))
+    partsys_2_dict = {str(p): df_2['부품구분'].tolist()[n] for n, p in enumerate(df_2['품번'].tolist())}
+    df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
+    df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
+
+    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '사정결과', '부품체계_1', '부품체계_2', ]]
+
+    filename = "품목구분결과_test"
+    with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
+        df.to_excel(writer, sheet_name='품번체계', index=False)
+    os.startfile(rf'files\spawn\{filename}.xlsx')

@@ -1,6 +1,5 @@
 import pandas as pd
-import sqlite3
-import warnings
+import sqlite3, os, warnings
 from utils.functions import show_elapsed_time
 from utils.config import SQL_SCHEMA
 
@@ -12,7 +11,7 @@ class MasterDBStorage:
         self.table_name = name
         self.excel_name = rf'files\{self.table_name}.xlsx'
         self.db = "master.db"
-        self.db_directory = rf"files\{self.db}"
+        self.db_directory = os.path.abspath(rf"files\{self.db}")
 
         if append_from_file:
             try:
