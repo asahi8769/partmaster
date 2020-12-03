@@ -1,6 +1,6 @@
 .idea
 .git
-venv
+\venv*/
 __pycache__
 \clone_*/
 
