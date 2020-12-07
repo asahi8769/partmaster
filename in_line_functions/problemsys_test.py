@@ -30,26 +30,26 @@ def partsys_1_2(df):
 
 def part_names():
     with open('files/품목구분기준.xlsx', 'rb') as file:
-        df = pd.read_excel(file, usecols="I:J")
-        codes = remove_duplication(df['코드'].tolist())
-        names = remove_duplication([i.replace('(주)', " ").split(' ') for i in df['코드'].tolist() if len(i)>0])
-    return codes + names
+        df = pd.read_excel(file, usecols="B:C, F, H, K, L, O")
+        partnames = df['귀책처'].tolist()
+        partnames = [i.split(', ') for i in partnames]
+    return flatten(partnames)
 
 
 def supplier_names():
     with open('files/불량유형수기정리.xlsx', 'rb') as file:
-        df = pd.read_excel(file)
-        partnames = df['품명단어'].tolist()
-        partnames = [i.split(', ') for i in partnames]
-    return flatten(partnames)
-
+        df = pd.read_excel(file, usecols="I:J")
+        print(df)
+        codes = remove_duplication(df['코드'].tolist())
+        names = remove_duplication([i.replace('(주)', " ").replace('(유)', " ").split(' ') for i in df['귀책처'].tolist()
+                                    if len(i)>0])
+    return codes+names
 
 def pre_processing(df):
     words_to_skip = [i for i in part_names() if i not in
                      ['PAINT', 'DUST', 'SCR', 'MOLDING', 'FUNCTION', 'INJECTION', 'DM', '불량', 'HIGH EFFORT',
                       'COUPLING', 'MECHANISM', 'NOISE', 'PACKING', 'EXTRA', 'POSITION']]
     words_to_skip += supplier_names()
-    print(words_to_skip)
     words_to_skip += ['코리아오토글라스', 'ASSY', 'KOREA', 'CORPORATION', 'HX', 'RR', 'RH', 'VISUAL', 'HCF', 'D&R',
                       'REFER', 'THE', 'SAME', 'PROBLEM', 'BDM', 'MOBIS', 'KIMCHEON', 'CV', 'COMPL', 'FR', 'LH',
                       'INFORMATION', 'WI', 'VER', 'REWORK', 'FI', 'SLH', 'UI', 'PPR', 'TRG',
