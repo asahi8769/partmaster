@@ -91,6 +91,7 @@ def pre_processing(df):
                              'WEBASTO', 'WHEN', 'WHILE', 'WHISTLE', 'WI', 'WIA', 'WILL', 'WIRRING', 'WON', 'WOO',
                              'YOUNGSAN', 'YPI', 'YZ', 'КК''나전', '도어벨트', '만도', '스트라이커외', '오송', '으로', '인한']
     words_to_skip += additional_exceptions
+    print("Filtering :", len(words_to_skip))
 
     revised_title = [i.upper() for i in df['제목'].tolist()]
     word_list = []
