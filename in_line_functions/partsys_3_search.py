@@ -145,6 +145,7 @@ def partsys_3_search(df):
     # print(Counter(df['정리']))
     return df
 
+
 if __name__ == "__main__":
     from master_db import MasterDBStorage
     import os

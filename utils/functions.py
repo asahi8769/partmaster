@@ -2,6 +2,7 @@ import os, time
 from subprocess import Popen, PIPE
 from os.path import basename
 from zipfile import ZipFile
+from functools import reduce
 
 
 def make_dir(dirname):
@@ -65,3 +66,21 @@ def show_elapsed_time(function):
         print(function.__name__, 'Elapsed {0:02d}:{1:02d}'.format(*divmod(int(time.time() - start), 60)))
         return returns
     return wrapper
+
+
+def flatten(ls):
+    """
+    ls : list
+    flattens multi-dimensional list
+    """
+    return list(set([i for i in reduce(lambda x, y: x + y, ls)]))
+
+
+def remove_duplication(ls):
+    """
+    ls : list
+    remove duplicated items while maintaining order
+    """
+    seen = set()
+    seen_add = seen.add
+    return [i for i in ls if not (i in seen or seen_add(i))]
