@@ -56,7 +56,7 @@ def partsys_3_search(df):
     length_ = ["" for _ in namelist]
     stage__ = ["" for _ in namelist]
     for n, i in enumerate(df['품명단어'].tolist()):
-        if n % 1000 == 0: print(n)
+        # if n % 1000 == 0: print(n)
         if audited[n] == "":
             for key in key_sequence:
                 if key == i:
