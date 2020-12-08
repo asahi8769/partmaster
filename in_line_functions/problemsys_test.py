@@ -92,7 +92,7 @@ def pre_processing(df):
                              'YOUNGSAN', 'YPI', 'YZ', 'КК''나전', '도어벨트', '만도', '스트라이커외', '오송', '으로', '인한',
                              'COMPRESSION', 'MTNG', 'BORE', 'VR', 'HOT', 'STAPLE', 'BULB','SEJIN', 'DELTARH', 'DRLH',
                              'JO', 'KMI', 'ACN', 'SAMBO', 'ILJIN', 'HLLD', 'JOYSON', 'SYSTEMS', 'YP', 'REPORT', 'QL',
-                             'GAT', 'HCC', 'POLYURETHANE', 'CHE', 'JF', 'КК', 'WERE', 'REJECTED',]
+                             'GAT', 'HCC', 'POLYURETHANE', 'CHE', 'JF', 'КК', 'WERE', 'REJECTED', 'FIT']
     words_to_skip += additional_exceptions
     print("Filtering :", len(words_to_skip))
 
@@ -102,8 +102,8 @@ def pre_processing(df):
         name = n.replace("SUB-PART", "SUBPART").replace("SUB PART", "SUBPART").replace(
             "SUB PART PROBLEM","SUBPART").replace("PARTS", "PART").replace("으로", "").replace(
             "PRESSURE", "압력").replace("NOT FIXED", "SUBPART").replace("FITTING", "FIT").replace("FITTED", "FIT").replace(
-            "NOT FIT", "UNFITTING").replace("갭", "GAP").replace("MARKS", "마크").replace("MARK", "마크").replace(
-            "WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace("홀", "HOLE")
+            "NOT FIT", "UNFITTING").replace("BAD FIT", "UNFITTING").replace("갭", "GAP").replace("MARKS", "마크").replace(
+            "MARK", "마크").replace("WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace("홀", "HOLE")
         name = re.sub("(NO)(\.)[0-9\s]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9_]|[\W]", ' ', name)
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
