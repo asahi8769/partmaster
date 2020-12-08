@@ -68,7 +68,7 @@ def pre_processing(df):
     df['제목_1'] = [', '.join(i) for i in word_list]
     df['제목_1_발생빈도'] = [Counter(df['제목_1'].tolist())[i] for i in df['제목_1'].tolist()]
     # df.sort_values(["발생빈도", "불량구분", "제목_1_발생빈도"], inplace=True, ascending=[False, True, False])
-    df.sort_values(["불량구분", "제목_1_발생빈도"], inplace=True, ascending=[False, True, False])
+    df.sort_values(["불량구분", "제목_1_발생빈도"], inplace=True, ascending=[True, False])
     return df
 
 

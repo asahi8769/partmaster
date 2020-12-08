@@ -69,4 +69,10 @@ additional_exceptions = ['AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTAT
                          'PY', 'QM', 'QS', 'QT', 'QY', 'QZ', 'RD', 'RK', 'SF', 'TP', 'TQ', 'TU', 'TW', 'UD', 'UN', 'VM',
                          'VT', 'VU', 'VW', 'WK', 'XM', 'XN', 'YD', 'YF', 'YG', 'YN', 'YS', '不良', '东和', '凹坑', '划伤', '压痕',
                          '变形', '廊坊', '异物', '打磨', '星宇', '月H', '月M', '毛刺', '气泡', '污染', '污渍', '油污', '涂装', '混品', '漏气', '真元',
-                         '破损', '磕伤', '磕碰', '磨损', '立中', '缺损', '脚印', '铸造', '颠倒', '龙口', ]
+                         '破损', '磕伤', '磕碰', '磨损', '立中', '缺损', '脚印', '铸造', '颠倒', '龙口','ADD', 'ALC', 'APR',
+                         'BAL', 'BLK', 'CSC', 'C엔진', 'DEL', 'DKD', 'DWI', 'EXP', 'FF용', 'HAM', 'HLA', 'HLW', 'INJ',
+                         'IPE', 'JCA', 'JIT', 'KOP', 'KRN', 'LHV', 'LSU' 'NYC', 'NYV', 'OCT', 'OPR', 'OPT', 'PDE',
+                         'PGU', 'PIT', 'QLE', 'QTC', 'QZE', 'RHD', 'ROF', 'RRC','R혼입', 'SEA', 'SIA', 'SIL', 'SLE',
+                         'SOP', 'SWG', 'TON', 'TRK', 'UND', 'UPP', 'URG', 'VLV', 'WHE', 'WTS','含铸造', '捷喜爱', '未成型',
+                         '耐克森', '龙口M','국내용','김동현', '김현우', '김현일', '김홍장', '부근에','유창근', '이동수','이상윤',
+                         '이승환','장형규',]

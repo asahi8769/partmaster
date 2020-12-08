@@ -9,12 +9,13 @@ class DomeFilter:
 
     def __init__(self, type):
         table_name = 'master_' + type + '_spawn'
-        self.spawn_name = rf'files\{type}_ranking.xlsx'
+        self.spawn_name = rf'files\spawn\{type}_ranking.xlsx'
         self.master_df = MasterDBStorage(table_name).df
         self.master_df.fillna("", inplace=True)
         self.master_df.apply(pd.to_numeric, errors='ignore')
         self.pre_processing()
         self.filtering()
+        print(self.master_df)
         print('Remaining Parts After Filtering :', len(self.master_df))
         self.grouping()
 
@@ -41,14 +42,14 @@ class DomeFilter:
         criterion_list = list(filter(lambda x: x.startswith('외관') or x == '_외관불량유형수', self.master_df.columns.tolist()))
         grouped_df_3 = self.master_df.groupby(['부품체계_3'])[criterion_list].apply(
             lambda x: x.astype(float).sum()).reset_index()
-        grouped_df_4 = self.master_df.groupby(['부품체계_4'])[criterion_list].apply(
-            lambda x: x.astype(float).sum()).reset_index()
+        # grouped_df_4 = self.master_df.groupby(['부품체계_4'])[criterion_list].apply(
+        #     lambda x: x.astype(float).sum()).reset_index()
         with pd.ExcelWriter(self.spawn_name) as writer:
             grouped_df_3.to_excel(writer, sheet_name='부품체계_3_기준', index=False)
-            grouped_df_4.to_excel(writer, sheet_name='부품체계_4_기준', index=False)
+            # grouped_df_4.to_excel(writer, sheet_name='부품체계_4_기준', index=False)
         os.startfile(self.spawn_name)
 
 
 if __name__ == "__main__":
     DomeFilter('dom')
-    DomeFilter('exp')
+    # DomeFilter('exp')

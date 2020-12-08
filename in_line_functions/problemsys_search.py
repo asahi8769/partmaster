@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     df = df[['제목', '불량구분', '부품체계_2', '제목_1', '제목_1_발생빈도', '불량정리', '불량구분결과']]
     df_ = df[df['불량정리'] == ""]
-    print(sorted([i for i in remove_duplication(flatten([i.split(', ') for i in df_['제목_1'].tolist()])) if len(i)==2]))
+    print(sorted([i for i in remove_duplication(flatten([i.split(', ') for i in df_['제목_1'].tolist()])) if len(i)==3]))
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
         df.to_excel(writer, sheet_name='품번체계', index=False)
     os.startfile(rf'files\spawn\{filename}.xlsx')

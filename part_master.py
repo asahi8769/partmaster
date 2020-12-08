@@ -225,29 +225,26 @@ class DomeMaster:
 
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3(obj.master_df)
-        # obj.part_type_4(obj.master_df)
 
-        # if obj.type == 'dom':
-        #     obj.dom_prob_type()
-        #     obj.dom_frequency()
-        #     obj.dom_amount()
-        #     obj.appearance_type(obj.dom_insp_df)
-        #     obj.part_type_1_2(obj.dom_insp_df)
-        #     obj.part_type_3(obj.dom_insp_df)
-        #     obj.part_type_4(obj.dom_insp_df)
-        #
-        #     obj.spawn(obj.dom_insp_df, obj.type)
+        if obj.type == 'dom':
+            obj.dom_prob_type()
+            obj.dom_frequency()
+            obj.dom_amount()
+            obj.appearance_type(obj.dom_insp_df)
+            obj.part_type_1_2(obj.dom_insp_df)
+            obj.part_type_3(obj.dom_insp_df)
 
-        # if obj.type == 'exp':
-        #     obj.exp_prob_type()
-        #     obj.exp_frequency()
-        #     obj.exp_amount()
-        #     obj.appearance_type(obj.exp_insp_df)
-        #     obj.part_type_1_2(obj.exp_insp_df)
-        #     obj.part_type_3(obj.exp_insp_df)
-        #     obj.part_type_4(obj.exp_insp_df)
-        #
-        #     obj.spawn(obj.exp_insp_df, obj.type)
+            obj.spawn(obj.dom_insp_df, obj.type)
+
+        if obj.type == 'exp':
+            obj.exp_prob_type()
+            obj.exp_frequency()
+            obj.exp_amount()
+            obj.appearance_type(obj.exp_insp_df)
+            obj.part_type_1_2(obj.exp_insp_df)
+            obj.part_type_3(obj.exp_insp_df)
+
+            obj.spawn(obj.exp_insp_df, obj.type)
 
         obj.spawn(obj.master_df)
 
@@ -255,8 +252,8 @@ class DomeMaster:
     def spawn(self, df, name='master'):
         if name == 'master':
             name = name+'_'+self.type
-        filename = rf'files\{name}_spawn.xlsx'
-        with pd.ExcelWriter(rf'files\{name}_spawn.xlsx') as writer:
+        filename = rf'files\spawn\{name}_spawn.xlsx'
+        with pd.ExcelWriter(rf'files\spawn\{name}_spawn.xlsx') as writer:
             df.to_excel(writer, sheet_name='결과', index=False)
         os.startfile(filename)
         table_name = f'{name}_spawn'
@@ -264,5 +261,5 @@ class DomeMaster:
 
 
 if __name__ == "__main__":
-    DomeMaster.run(d_type='exp')
-    # DomeMaster.run(d_type='dom')
+    # DomeMaster.run(d_type='exp')
+    DomeMaster.run(d_type='dom')
