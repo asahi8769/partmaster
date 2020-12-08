@@ -1,6 +1,5 @@
 import pandas as pd
 from utils.functions import flatten, remove_duplication
-from master_db import MasterDBStorage
 import os, re
 import pickle
 from collections import Counter
@@ -140,17 +139,19 @@ def partsys_3_search(df):
                     break
         if audited[n] == "":
             for key in key_sequence:
-                if i.split(', ')[0] == key.split(', ')[0]:
+                if i in key or key in i:
                     audited[n] = classifier_dict[key]['불량구분']
                     stage__[n] = '[7]추정'
                     break
 
     df['불량정리'] = audited
     df['불량구분결과'] = stage__
+    print(Counter(df['불량구분결과']))
     return df
 
 
 if __name__ == "__main__":
+    from master_db import MasterDBStorage
     os.chdir(os.pardir)
     print("Current working directory: {0}".format(os.getcwd()))
 
@@ -165,15 +166,12 @@ if __name__ == "__main__":
 
     def dom_data():
         df = MasterDBStorage('입고불량이력').df
-        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
         return df
 
     # df = exp_data()
     df = dom_data()
-    classifier_dict, key_sequence = problem_type_dict()
-    print(classifier_dict['MALFUNCTION'])
 
-    # print(key_sequence)
     df = partsys_3_search(df)
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
@@ -188,7 +186,7 @@ if __name__ == "__main__":
 
     df = df[['제목', '불량구분', '부품체계_2', '제목_1', '제목_1_발생빈도', '불량정리', '불량구분결과']]
     df_ = df[df['불량정리'] == ""]
-    print(sorted([i for i in remove_duplication(flatten([i.split(', ') for i in df_['제목_1'].tolist()])) if len(i)==4]))
+    print(sorted([i for i in remove_duplication(flatten([i.split(', ') for i in df_['제목_1'].tolist()])) if len(i)==2]))
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
         df.to_excel(writer, sheet_name='품번체계', index=False)
     os.startfile(rf'files\spawn\{filename}.xlsx')

@@ -73,11 +73,27 @@ def pre_processing(df):
 
 if __name__ == "__main__":
     import os
+    from master_db import MasterDBStorage
+
+    def exp_data():
+        df = MasterDBStorage('해외불량이력').df
+        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
+        df.drop_duplicates(subset="Part No", keep='first', inplace=True)
+        df.drop_duplicates(subset="부품명", keep='first', inplace=True)
+        return df
+
+
+    def dom_data():
+        df = MasterDBStorage('입고불량이력').df
+        df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
+        return df
 
     os.chdir(os.pardir)
     print("Current working directory: {0}".format(os.getcwd()))
 
-    df = problem_data()
+    # df = problem_data()
+    df = dom_data()
     df = partsys_1_2(df)
     df = partsys_3_search(df)
 
