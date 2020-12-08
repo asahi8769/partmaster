@@ -2,7 +2,7 @@ words_not_to_skip = ['PAINT', 'DUST', 'SCR', 'MOLDING', 'FUNCTION', 'INJECTION',
                      'COUPLING', 'MECHANISM', 'NOISE', 'PACKING', 'EXTRA', 'POSITION', 'WELD', 'PRESS', 'RUST',
                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID', 'WELDING', 'OPEN', 'FLUSH', 'CHARGING']
 
-additional_exceptions = {'AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER', 'XCIENT', 'KD', 'EHJ',
+additional_exceptions = ['AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER', 'XCIENT', 'KD', 'EHJ',
                          'ALSO', 'AN', 'ANTEENA', 'ANY', 'APPLICATION', 'AQL', 'ARE', 'AREA', 'ASAN', 'ASHA', 'ASSI',
                          'ASSY', 'AUTOGLASS', 'AUTOMOTIVE', 'AVAILABLE', 'BBD', 'BC', 'BDC', 'BDM', 'BE', 'BEFORE',
                          'BELT', 'BETWEEM', 'BETWEEN', 'BH', 'BJA', 'BJB', 'BJC', 'BMU', 'BOOSTER', 'BOTTOM', 'BQ',
@@ -69,4 +69,4 @@ additional_exceptions = {'AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTAT
                          'PY', 'QM', 'QS', 'QT', 'QY', 'QZ', 'RD', 'RK', 'SF', 'TP', 'TQ', 'TU', 'TW', 'UD', 'UN', 'VM',
                          'VT', 'VU', 'VW', 'WK', 'XM', 'XN', 'YD', 'YF', 'YG', 'YN', 'YS', '不良', '东和', '凹坑', '划伤', '压痕',
                          '变形', '廊坊', '异物', '打磨', '星宇', '月H', '月M', '毛刺', '气泡', '污染', '污渍', '油污', '涂装', '混品', '漏气', '真元',
-                         '破损', '磕伤', '磕碰', '磨损', '立中', '缺损', '脚印', '铸造', '颠倒', '龙口', }
+                         '破损', '磕伤', '磕碰', '磨损', '立中', '缺损', '脚印', '铸造', '颠倒', '龙口', ]
