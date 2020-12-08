@@ -27,7 +27,10 @@ def part_names():
         df = pd.read_excel(file, usecols="B:C, F, H, K, L, O")
         partnames = df['품명단어'].tolist()
         partnames = [i.split(', ') for i in partnames]
-        partnames = flatten(partnames)
+        partnames = remove_duplication(flatten(partnames))
+        partnames_kor = df['기준1'].tolist()
+        partnames_kor = remove_duplication(partnames_kor)
+        partnames += partnames_kor
     with open('files/spawn/부품명리스트.pkl', 'wb') as f:
         pickle.dump(partnames, f)
     return partnames
@@ -106,6 +109,41 @@ def partsys_3_search(df):
                     audited[n] = classifier_dict[key]['불량구분']
                     stage__[n] = '[2]역순'
                     break
+        if audited[n] == "":
+            for key in key_sequence:
+                if len(key.split(', ')) >= 3 and len(i.split(', ')) >= 3 and set(key.split(', ')[0:3]) == set(
+                        i.split(', ')[0:3]):
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[3]부분_3'
+                    break
+        if audited[n] == "":
+            for key in key_sequence:
+                if len(key.split(', ')) >= 2 and len(i.split(', ')) >= 2 and key.split(', ')[0:2] == i.split(', ')[0:2]:
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[4]부분_2'
+                    break
+        if audited[n] == "":
+            for key in key_sequence:
+                k_str = ', '.join(key.split(', ')[1:])
+                i_str = ', '.join(i.split(', ')[1:])
+                if (k_str in i_str or i_str in k_str) and i.split(', ')[0] == key.split(', ')[0]:
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[5]포함'
+                    break
+        if audited[n] == "":
+            for key in key_sequence:
+                k_set = set(key.split(', ')[1:])
+                i_set = set(i.split(', ')[1:])
+                if (k_set.issuperset(i_set) or k_set.issuperset(i_set)) and i.split(', ')[0] == key.split(', ')[0]:
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[6]교차'
+                    break
+        if audited[n] == "":
+            for key in key_sequence:
+                if i.split(', ')[0] == key.split(', ')[0]:
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[7]추정'
+                    break
 
     df['불량정리'] = audited
     df['불량구분결과'] = stage__
@@ -128,7 +166,7 @@ if __name__ == "__main__":
     classifier_dict, key_sequence = problem_type_dict()
     print(classifier_dict['MALFUNCTION'])
 
-    print(key_sequence)
+    # print(key_sequence)
     df = partsys_3_search(df)
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
@@ -139,9 +177,11 @@ if __name__ == "__main__":
     df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
     df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
 
-    filename = "품목구분결과_test"
+    filename = "불량구분결과_test"
 
     df = df[['제목', '불량구분', '부품체계_2', '제목_1', '제목_1_발생빈도', '불량정리', '불량구분결과']]
+    df_ = df[df['불량정리'] == ""]
+    print(sorted([i for i in remove_duplication(flatten([i.split(', ') for i in df_['제목_1'].tolist()])) if len(i)==4]))
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
         df.to_excel(writer, sheet_name='품번체계', index=False)
     os.startfile(rf'files\spawn\{filename}.xlsx')
