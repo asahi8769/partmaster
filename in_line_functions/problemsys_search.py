@@ -162,7 +162,14 @@ if __name__ == "__main__":
         df.drop_duplicates(subset="부품명", keep='first', inplace=True)
         return df
 
-    df = exp_data()
+
+    def dom_data():
+        df = MasterDBStorage('입고불량이력').df
+        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        return df
+
+    # df = exp_data()
+    df = dom_data()
     classifier_dict, key_sequence = problem_type_dict()
     print(classifier_dict['MALFUNCTION'])
 
