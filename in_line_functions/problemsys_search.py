@@ -4,6 +4,7 @@ from master_db import MasterDBStorage
 import os, re
 import pickle
 from collections import Counter
+from in_line_functions.config import words_not_to_skip, additional_exceptions
 
 
 def problem_type_dict():
@@ -11,11 +12,13 @@ def problem_type_dict():
         df = pd.read_excel(file, sheet_name='불량구분_1')
         df.fillna('', inplace=True)
         df['불량길이'] = [len(df['제목_1'].tolist()[n].split(', ')) for n in range(len(df))]
+        df.sort_values(["불량길이", "제목_1_발생빈도"], inplace=True, ascending=[False, False])
         key_sequence = df['제목_1'].tolist()
 
     classifier_dict = {
         i: {'불량구분': df['불량구분'].tolist()[n], '부품체계': remove_duplication(df[df['불량구분']==df['불량구분'].tolist()[n]]['부품체계_2'].tolist())}
         for n, i in enumerate(key_sequence)}
+    key_sequence = remove_duplication(key_sequence)
     return classifier_dict, key_sequence
 
 
@@ -43,7 +46,7 @@ def supplier_names():
     return codes + names
 
 
-def pre_processing(df, revised_title):
+def get_basic_filters():
     if os.path.isfile('files/spawn/부품명리스트.pkl'):
         with open('files/spawn/부품명리스트.pkl', 'rb') as f:
             part_list = pickle.load(f)
@@ -54,63 +57,23 @@ def pre_processing(df, revised_title):
             supplier_list = pickle.load(f)
     else:
         supplier_list = supplier_names()
+    return part_list, supplier_list
 
-    words_to_skip = [i for i in part_list + supplier_list if i not in
-                     ['PAINT', 'DUST', 'SCR', 'MOLDING', 'FUNCTION', 'INJECTION', 'DM', '불량', 'HIGH EFFORT',
-                      'COUPLING', 'MECHANISM', 'NOISE', 'PACKING', 'EXTRA', 'POSITION', 'WELD', 'PRESS', 'RUST',
-                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID', 'OPEN']]
-    additional_exceptions = ['AA', 'AB', 'ABNORAL', 'ABNORMAL', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER',
-                             'ALSO', 'AN', 'ANTEENA', 'ANY', 'APPLICATION', 'AQL', 'ARE', 'AREA', 'ASAN', 'ASHA',
-                             'ASSI','KMI', 'ACN', 'SAMBO', 'ILJIN', 'HLLD', 'JOYSON', 'SYSTEMS', 'YP', 'REPORT', 'QL',
-                             'ASSY', 'AUTOGLASS', 'AUTOMOTIVE', 'AVAILABLE', 'BBD', 'BC', 'BDC', 'BDM', 'BE', 'BEFORE',
-                             'BELT', 'BETWEEM', 'BETWEEN', 'BH', 'BJA', 'BJB', 'BJC', 'BMU', 'BOOSTER', 'BOTTOM', 'BQ',
-                             'BRCT', 'BRD', 'BRK', 'BSA', 'BUTTONS', 'CA', 'CAME', 'CBR', 'CDC', 'CF', 'CHANG',
-                             'CHEMICAL', 'CHNL', 'CHROME', 'CKLIP', 'CLEARLH', 'CLIPEND', 'CLOSING', 'CN', 'CNS', 'CO',
-                             'COMBILAMP', 'COMES', 'COMING', 'COMPL', 'COMPLETE', 'CONCERN', 'CONNECTORS',
-                             'CORPORATION', 'CRETA', 'CV', 'D&R', 'DAEDONG', 'DENSO', 'DH', 'DISCK', 'DKE', 'DL',
-                             'DONG', 'DRRH', 'DUA', 'DUE', 'DURIGN', 'DURING', 'DY', 'ECOPLASTIC', 'ECOS', 'EK',
-                             'ELEMENT', 'ENDPIECE', 'FB', 'FC', 'FE', 'FI', 'FM', 'FOUND', 'FPSC', 'FR', 'FROM', 'FRT',
-                             'FULLER', 'GCB', 'GCC', 'GCD', 'GCE', 'GCF', 'GE', 'GEARS', 'GI', 'GI', 'GIVING', 'GONG',
-                             'GRL', 'GRUME', 'GSK', 'GSR', 'GX', 'HADS', 'HANKOOK', 'HAUSYS', 'HC', 'HCD', 'HCE', 'HCF',
-                             'HCG', 'HCR', 'HDLLH', 'HE', 'HEADLAMP', 'HEADLH', 'HEADRH', 'HEE', 'HEMMING', 'HENKEL',
-                             'HEUNG', 'HI', 'HING', 'HM', 'HMI', 'HMMC', 'HMSK', 'HOME', 'HTK', 'HX', 'HYUNDAI', 'IL',
-                             'ILLUMINATION', 'IMT', 'INCOMING', 'IND', 'INDIA', 'INFAC', 'INFORMATION',
-                             'INITIAL', 'INSPECTOR', 'INTERMOBILE', 'INTERNAL', 'IQR', 'IS', 'ISIR', 'ISSUE', 'ISSUES',
-                             'IT', 'ITS', 'JIG', 'JIN', 'JNT', 'JOIL', 'JS', 'JULY', 'JUNG', 'JUST', 'KA', 'KAC', 'KF',
-                             'KIA', 'KIMCHEON', 'KMS', 'KNIFE', 'KNOBB', 'KOMOS', 'KOREA', 'KWANGJIN', 'KYUNG', 'LANE',
-                             'LEFT', 'LG', 'LH', 'LHD', 'LINKAGE', 'LIQUID', 'LN', 'LOADING', 'LOT', 'LOUD', 'LPL',
-                             'LS', 'LTD', 'LUG', 'MANDO', 'MDPS', 'METAL', 'MJ', 'MOBIS', 'MODEL', 'MONETARY', 'MTGRH',
-                             'MU', 'MULTIPLE', 'NAIL', 'NAJEON', 'NATIONAL', 'NEW', 'NG', 'NO.', 'NOIDA', 'NOTCH',
-                             'NVH', 'GAT', 'HCC', 'POLYURETHANE', 'CHE', 'JF', 'КК', 'WERE', 'REJECTED',
-                             'OB', 'OBSERVED', 'OCCURRED', 'OF', 'OFFSET', 'OK', 'OPERATING', 'OPERATION', 'OPERATOR',
-                             'PACKED', 'PADDLE', 'PBBLE', 'PCB', 'PCD', 'PCM', 'PDI', 'PHEV', 'PLAKOR', 'PLATECH',
-                             'POONGSUNG', 'PP', 'PPR', 'PRESENTED', 'PRIVATE', 'PROBLEM', 'PROTECTION', 'PRTN', 'PSTN',
-                             'PTRH', 'PVT', 'PYUNG', 'QARTER', 'QB', 'QC', 'QRT', 'QUALITY', 'QXI', 'RATTLE', 'REAR',
-                             'RECEIVED', 'RECEIVING', 'RECIEVED', 'RECIEVING', 'REFER', 'REISSUE', 'RELATED', 'REPAIR',
-                             'REWORK', 'RH', 'RIB', 'ROCS', 'ROOFLH', 'ROTATION', 'RP', 'RR', 'RRDR', 'RRRH', 'RT',
-                             'RU', 'SAE', 'SAEDONG', 'SAMBOA', 'SAMBOPLATEC', 'SAME', 'SAMPLE', 'SAMSHIN', 'SAMSONG',
-                             'SAN', 'SB', 'SC', 'SEAR', 'SEATBELT', 'SEATING', 'SECOND', 'SEEM', 'SENDER', 'SEOYON',
-                             'SEQUENCING', 'SEUN', 'SHIFTING', 'SHIN', 'SHINKI', 'SHLD', 'SHOWING', 'SIDELH', 'SL',
-                             'SLH', 'SORTED', 'SOS', 'SPOOL', 'SQUEAK', 'SRH', 'SSUNGLASS', 'STAGE', 'STD', 'STICK',
-                             'STUDBOLT', 'SUBCONTRACT', 'SUNG', 'SUNGLASS', 'SUNGLASSED', 'SUNGLASSES',
-                             'SUPPLIER', 'SUV', 'SVG', 'TACHOMETER', 'TAE', 'TCU', 'TECH', 'TENSR', 'TERMINAL', 'TF',
-                             'THAN', 'THE', 'THERE', 'THORTTLE', 'TL', 'TLI', 'TMA', 'KWANGIL', 'INNOVATION', 'UMA',
-                             'TOO', 'TR', 'TRANIT', 'TRANS', 'TRANSYS', 'TRG', 'TRIGO', 'TRW', 'TTX', 'TURNS', 'UI',
-                             'UIP', 'UNIV', 'UNUSED', 'USED', 'VER', 'VIBRACOUSTIC', 'VISIBLE', 'VISUAL', 'VS', 'WAS',
-                             'WEBASTO', 'WHEN', 'WHILE', 'WHISTLE', 'WI', 'WIA', 'WILL', 'WIRRING', 'WON', 'WOO',
-                             'YOUNGSAN', 'YPI', 'YZ', 'КК''나전', '도어벨트', '만도', '스트라이커외', '오송', '으로', '인한',
-                             'COMPRESSION', 'MTNG', 'BORE', 'VR', 'HOT', 'STAPLE', 'BULB', 'SEJIN', 'DELTARH', 'DRLH',
-                             'JO']
+
+def pre_processing(df, title):
+    part_list, supplier_list = get_basic_filters()
+    words_to_skip = [i for i in part_list + supplier_list if i not in words_not_to_skip]
     words_to_skip += additional_exceptions
     print("Filtering :", len(words_to_skip))
 
     word_list = []
-    for i, n in enumerate(revised_title):
+    for i, n in enumerate(title):
         name = n.replace("SUB-PART", "SUBPART").replace("SUB PART", "SUBPART").replace(
-            "SUB PART PROBLEM", "SUBPART").replace("PARTS", "PART").replace("으로", "").replace(
-            "PRESSURE", "압력").replace("NOT FIXED", "UNFIXED").replace("FITTING", "FIT").replace("FITTED", "FIT").replace(
-            "NOT FIT", "UNFITTING").replace("갭", "GAP").replace("MARKS", "마크").replace("MARK", "마크").replace(
-            "WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace("홀", "HOLE")
+            "SUB PART PROBLEM","SUBPART").replace("PARTS", "PART").replace("으로", "").replace(
+            "PRESSURE", "압력").replace("NOT FIXED", "SUBPART").replace("FITTING", "FIT").replace("FITTED", "FIT").replace(
+            "NOT FIT", "UNFITTING").replace("BAD FIT", "UNFITTING").replace("갭", "GAP").replace("MARKS", "마크").replace(
+            "MARK", "마크").replace("WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace(
+            "홀", "HOLE").replace("BAR CODE", "BARCODE")
         name = re.sub("(NO)(\.)[0-9\s]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9_]|[\W]", ' ', name)
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
@@ -123,17 +86,30 @@ def pre_processing(df, revised_title):
 
 def partsys_3_search(df):
     classifier_dict, key_sequence = problem_type_dict()
-    revised_title = [i.upper() for i in df['제목'].tolist()]
-    df = pre_processing(df, revised_title)
+    key_sequence = remove_duplication(key_sequence)
+    title = [i.upper() for i in df['제목'].tolist()]
+    df = pre_processing(df, title)
 
-    audited = ["" for _ in revised_title]
-    problem_class = ["" for _ in revised_title]
+    audited = ["" for _ in title]
+    stage__ = ["" for _ in title]
 
-    for n, i in enumerate(df['제목'].tolist()):
+    for n, i in enumerate(df['제목_1'].tolist()):
         if audited[n] == "":
             for key in key_sequence:
                 if key == i:
                     audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[1]일치'
+                    break
+        if audited[n] == "":
+            for key in key_sequence:
+                if set(key.split(', ')) == set(i.split(', ')):
+                    audited[n] = classifier_dict[key]['불량구분']
+                    stage__[n] = '[2]역순'
+                    break
+
+    df['불량정리'] = audited
+    df['불량구분결과'] = stage__
+    return df
 
 
 if __name__ == "__main__":
@@ -150,4 +126,22 @@ if __name__ == "__main__":
 
     df = exp_data()
     classifier_dict, key_sequence = problem_type_dict()
-    print(classifier_dict)
+    print(classifier_dict['MALFUNCTION'])
+
+    print(key_sequence)
+    df = partsys_3_search(df)
+
+    with open('files/품목구분기준.xlsx', 'rb') as file:
+        df_1 = pd.read_excel(file, sheet_name='부품체계1')
+        df_2 = pd.read_excel(file, sheet_name='부품체계2')
+    partsys_1_dict = dict(zip([str(i) for i in df_1['품번'].tolist()], df_1['부품구분']))
+    partsys_2_dict = {str(p): df_2['부품구분'].tolist()[n] for n, p in enumerate(df_2['품번'].tolist())}
+    df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
+    df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
+
+    filename = "품목구분결과_test"
+
+    df = df[['제목', '불량구분', '부품체계_2', '제목_1', '제목_1_발생빈도', '불량정리', '불량구분결과']]
+    with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
+        df.to_excel(writer, sheet_name='품번체계', index=False)
+    os.startfile(rf'files\spawn\{filename}.xlsx')
