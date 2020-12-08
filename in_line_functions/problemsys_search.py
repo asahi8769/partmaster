@@ -58,7 +58,7 @@ def pre_processing(df, revised_title):
     words_to_skip = [i for i in part_list + supplier_list if i not in
                      ['PAINT', 'DUST', 'SCR', 'MOLDING', 'FUNCTION', 'INJECTION', 'DM', '불량', 'HIGH EFFORT',
                       'COUPLING', 'MECHANISM', 'NOISE', 'PACKING', 'EXTRA', 'POSITION', 'WELD', 'PRESS', 'RUST',
-                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID']]
+                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID', 'OPEN']]
     additional_exceptions = ['AA', 'AB', 'ABNORAL', 'ABNORMAL', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER',
                              'ALSO', 'AN', 'ANTEENA', 'ANY', 'APPLICATION', 'AQL', 'ARE', 'AREA', 'ASAN', 'ASHA',
                              'ASSI','KMI', 'ACN', 'SAMBO', 'ILJIN', 'HLLD', 'JOYSON', 'SYSTEMS', 'YP', 'REPORT', 'QL',

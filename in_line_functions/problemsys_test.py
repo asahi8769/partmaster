@@ -51,8 +51,8 @@ def pre_processing(df):
     words_to_skip = [i for i in part_names()+supplier_names() if i not in
                      ['PAINT', 'DUST', 'SCR', 'MOLDING', 'FUNCTION', 'INJECTION', 'DM', '불량', 'HIGH EFFORT',
                       'COUPLING', 'MECHANISM', 'NOISE', 'PACKING', 'EXTRA', 'POSITION', 'WELD', 'PRESS', 'RUST',
-                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID']]
-    additional_exceptions = ['AA', 'AB', 'ABNORAL', 'ABNORMAL', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER',
+                      'HOLE', 'PIN', 'NUT', 'LEVEL', 'LEATHER', 'STICKER', 'ID', 'WELDING', 'OPEN', 'FLUSH', 'CHARGING']]
+    additional_exceptions = ['AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTATOR', 'AFTER',
                              'ALSO', 'AN', 'ANTEENA', 'ANY', 'APPLICATION', 'AQL', 'ARE', 'AREA', 'ASAN', 'ASHA', 'ASSI',
                              'ASSY', 'AUTOGLASS', 'AUTOMOTIVE', 'AVAILABLE', 'BBD', 'BC', 'BDC', 'BDM', 'BE', 'BEFORE',
                              'BELT', 'BETWEEM', 'BETWEEN', 'BH', 'BJA', 'BJB', 'BJC', 'BMU', 'BOOSTER', 'BOTTOM', 'BQ',
@@ -61,7 +61,7 @@ def pre_processing(df):
                              'COMBILAMP', 'COMES', 'COMING', 'COMPL', 'COMPLETE', 'CONCERN', 'CONNECTORS',
                              'CORPORATION', 'CRETA', 'CV', 'D&R', 'DAEDONG', 'DENSO', 'DH', 'DISCK', 'DKE', 'DL',
                              'DONG', 'DRRH', 'DUA', 'DUE', 'DURIGN', 'DURING', 'DY', 'ECOPLASTIC', 'ECOS', 'EK',
-                             'ELEMENT', 'ENDPIECE', 'FB', 'FC', 'FE', 'FI', 'FM', 'FOUND', 'FPSC', 'FR', 'FROM', 'FRT',
+                             'ELEMENT', 'ENDPIECE', 'FB', 'FC', 'FE', 'FI', 'FOUND', 'FPSC', 'FR', 'FROM', 'FRT',
                              'FULLER', 'GCB', 'GCC', 'GCD', 'GCE', 'GCF', 'GE', 'GEARS', 'GI', 'GI', 'GIVING', 'GONG',
                              'GRL', 'GRUME', 'GSK', 'GSR', 'GX', 'HADS', 'HANKOOK', 'HAUSYS', 'HC', 'HCD', 'HCE', 'HCF',
                              'HCG', 'HCR', 'HDLLH', 'HE', 'HEADLAMP', 'HEADLH', 'HEADRH', 'HEE', 'HEMMING', 'HENKEL',
@@ -73,18 +73,18 @@ def pre_processing(df):
                              'LEFT', 'LG', 'LH', 'LHD', 'LINKAGE', 'LIQUID', 'LN', 'LOADING', 'LOT', 'LOUD', 'LPL',
                              'LS', 'LTD', 'LUG', 'MANDO', 'MDPS', 'METAL', 'MJ', 'MOBIS', 'MODEL', 'MONETARY', 'MTGRH',
                              'MU', 'MULTIPLE', 'NAIL', 'NAJEON', 'NATIONAL', 'NEW', 'NG', 'NO.', 'NOIDA', 'NOTCH', 'NVH',
-                             'OB', 'OBSERVED', 'OCCURRED', 'OF', 'OFFSET', 'OK', 'OPERATING', 'OPERATION', 'OPERATOR',
+                             'OB', 'OBSERVED', 'OCCURRED', 'OF', 'OFFSET', 'OK', 'OPERATING', 'OPERATOR',
                              'PACKED', 'PADDLE', 'PBBLE', 'PCB', 'PCD', 'PCM', 'PDI', 'PHEV', 'PLAKOR', 'PLATECH',
-                             'POONGSUNG', 'PP', 'PPR', 'PRESENTED', 'PRIVATE', 'PROBLEM', 'PROTECTION', 'PRTN', 'PSTN',
+                             'POONGSUNG', 'PP', 'PPR', 'PRESENTED', 'PRIVATE', 'PROTECTION', 'PRTN', 'PSTN',
                              'PTRH', 'PVT', 'PYUNG', 'QARTER', 'QB', 'QC', 'QRT', 'QUALITY', 'QXI', 'RATTLE', 'REAR',
-                             'RECEIVED', 'RECEIVING', 'RECIEVED', 'RECIEVING', 'REFER', 'REISSUE', 'RELATED', 'REPAIR',
-                             'REWORK', 'RH', 'RIB', 'ROCS', 'ROOFLH', 'ROTATION', 'RP', 'RR', 'RRDR', 'RRRH', 'RT',
+                             'REFER', 'REISSUE', 'RELATED', 'REPAIR',
+                             'REWORK', 'RH', 'RIB', 'ROCS', 'ROOFLH', 'RP', 'RR', 'RRDR', 'RRRH', 'RT',
                              'RU', 'SAE', 'SAEDONG', 'SAMBOA', 'SAMBOPLATEC', 'SAME', 'SAMPLE', 'SAMSHIN', 'SAMSONG',
                              'SAN', 'SB', 'SC', 'SEAR', 'SEATBELT', 'SEATING', 'SECOND', 'SEEM', 'SENDER', 'SEOYON',
-                             'SEQUENCING', 'SEUN', 'SHIFTING', 'SHIN', 'SHINKI', 'SHLD', 'SHOWING', 'SIDELH', 'SL',
+                             'SEQUENCING', 'SEUN', 'SHIN', 'SHINKI', 'SHLD', 'SHOWING', 'SIDELH', 'SL',
                              'SLH', 'SORTED', 'SOS', 'SPOOL', 'SQUEAK', 'SRH', 'SSUNGLASS', 'STAGE', 'STD', 'STICK',
                              'STUDBOLT', 'SUBCONTRACT', 'SUNG', 'SUNGLASS', 'SUNGLASSED', 'SUNGLASSES',
-                             'SUPPLIER', 'SUV', 'SVG', 'TACHOMETER', 'TAE', 'TCU', 'TECH', 'TENSR', 'TERMINAL', 'TF',
+                             'SUPPLIER', 'SUV', 'SVG', 'TACHOMETER', 'TAE', 'TCU', 'TECH', 'TENSR', 'TF',
                              'THAN', 'THE', 'THERE', 'THORTTLE', 'TL', 'TLI', 'TMA', 'KWANGIL', 'INNOVATION', 'UMA',
                              'TOO', 'TR', 'TRANIT', 'TRANS', 'TRANSYS', 'TRG', 'TRIGO', 'TRW', 'TTX', 'TURNS', 'UI',
                              'UIP', 'UNIV', 'UNUSED', 'USED', 'VER', 'VIBRACOUSTIC', 'VISIBLE', 'VISUAL', 'VS', 'WAS',
@@ -103,7 +103,8 @@ def pre_processing(df):
             "SUB PART PROBLEM","SUBPART").replace("PARTS", "PART").replace("으로", "").replace(
             "PRESSURE", "압력").replace("NOT FIXED", "SUBPART").replace("FITTING", "FIT").replace("FITTED", "FIT").replace(
             "NOT FIT", "UNFITTING").replace("BAD FIT", "UNFITTING").replace("갭", "GAP").replace("MARKS", "마크").replace(
-            "MARK", "마크").replace("WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace("홀", "HOLE")
+            "MARK", "마크").replace("WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace(
+            "홀", "HOLE").replace("BAR CODE", "BARCODE")
         name = re.sub("(NO)(\.)[0-9\s]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9_]|[\W]", ' ', name)
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
