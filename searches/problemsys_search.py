@@ -86,8 +86,7 @@ def pre_processing(df, title):
     return df
 
 
-def partsys_3_search(df):
-    classifier_dict, key_sequence = problem_type_dict()
+def problemsys_search(df, classifier_dict, key_sequence):
     key_sequence = remove_duplication(key_sequence)
     title = [i.upper() for i in df['제목'].tolist()]
     df = pre_processing(df, title)
@@ -171,8 +170,8 @@ if __name__ == "__main__":
 
     # df = exp_data()
     df = dom_data()
-
-    df = partsys_3_search(df)
+    classifier_dict, key_sequence = problem_type_dict()
+    df = problemsys_search(df, classifier_dict, key_sequence)
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
         df_1 = pd.read_excel(file, sheet_name='부품체계1')
