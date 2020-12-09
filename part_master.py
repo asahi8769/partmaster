@@ -13,23 +13,23 @@ class DomeMaster:
 
     def __init__(self, d_type):
         self.type = d_type
-        self.master_df = MasterDBStorage('파트마스터').df
+        self.master_df = MasterDBStorage('파트마스터', append_from_file=True).df
         self.master_df = self.master_df[self.master_col]
-        self.inspection_df = MasterDBStorage('중점검사표').df
+        self.inspection_df = MasterDBStorage('중점검사표', append_from_file=True).df
         self.inspection_df['Part No'] = [i.replace(" ", "") for i in self.inspection_df['Part No'].tolist()]
         if self.type == 'dom':
-            self.dom_insp_df = MasterDBStorage('입고불량이력').df
+            self.dom_insp_df = MasterDBStorage('입고불량이력', append_from_file=True).df
             self.dom_insp_df['Part No'] = [i.replace(" ", "") for i in self.dom_insp_df['Part No'].tolist()]
             self.dom_insp_df['제목_정리'] = self.prob_specify(self.dom_insp_df)
         if self.type == 'exp':
-            self.exp_insp_df = MasterDBStorage('해외불량이력').df
+            self.exp_insp_df = MasterDBStorage('해외불량이력', append_from_file=True).df
             self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
-            self.exp_insp_df['제목_정리'] = self.prob_specify(self.exp_insp_df)
+            # self.exp_insp_df['제목_정리'] = self.prob_specify(self.exp_insp_df)
 
-        self.in_business_df = MasterDBStorage('매입대').df
-        self.part_sys_2_df = MasterDBStorage('품번체계').df
-        self.packingspect_df = MasterDBStorage('전차종포장사양서').df
-        self.spawn_name = rf'files\{self.type}_spawn.xlsx'
+        self.in_business_df = MasterDBStorage('매입대', append_from_file=True).df
+        self.part_sys_2_df = MasterDBStorage('품번체계', append_from_file=True).df
+        self.packingspect_df = MasterDBStorage('전차종포장사양서', append_from_file=True).df
+        self.spawn_name = rf'files\spawn\{self.type}_spawn.xlsx'
 
     @show_elapsed_time
     def packaging_spec_information(self):
@@ -76,7 +76,7 @@ class DomeMaster:
 
     @staticmethod
     @show_elapsed_time
-    def part_type_3(df):
+    def part_type_3_4(df):
         partsys_3_search(df)
         return df
 
@@ -224,7 +224,7 @@ class DomeMaster:
         obj.business_binary()
 
         obj.master_df = obj.part_type_1_2(obj.master_df)
-        obj.master_df = obj.part_type_3(obj.master_df)
+        obj.master_df = obj.part_type_3_4(obj.master_df)
 
         if obj.type == 'dom':
             obj.dom_prob_type()
@@ -232,7 +232,7 @@ class DomeMaster:
             obj.dom_amount()
             obj.appearance_type(obj.dom_insp_df)
             obj.part_type_1_2(obj.dom_insp_df)
-            obj.part_type_3(obj.dom_insp_df)
+            obj.part_type_3_4(obj.dom_insp_df)
 
             obj.spawn(obj.dom_insp_df, obj.type)
 
@@ -240,9 +240,9 @@ class DomeMaster:
             obj.exp_prob_type()
             obj.exp_frequency()
             obj.exp_amount()
-            obj.appearance_type(obj.exp_insp_df)
+            # obj.appearance_type(obj.exp_insp_df)
             obj.part_type_1_2(obj.exp_insp_df)
-            obj.part_type_3(obj.exp_insp_df)
+            obj.part_type_3_4(obj.exp_insp_df)
 
             obj.spawn(obj.exp_insp_df, obj.type)
 
@@ -263,3 +263,5 @@ class DomeMaster:
 if __name__ == "__main__":
     # DomeMaster.run(d_type='exp')
     DomeMaster.run(d_type='dom')
+
+    # MasterDBStorage.run(table_name, df=df)

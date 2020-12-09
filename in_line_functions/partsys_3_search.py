@@ -53,6 +53,7 @@ def partsys_3_search(df):
     audited = ["" for _ in namelist]
     class_1 = ["" for _ in namelist]
     class_2 = ["" for _ in namelist]
+    class_3 = ["" for _ in namelist]
     length_ = ["" for _ in namelist]
     stage__ = ["" for _ in namelist]
     for n, i in enumerate(df['품명단어'].tolist()):
@@ -64,6 +65,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[1]일치'
                     break
@@ -74,6 +76,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[2]역순'
                     break
@@ -86,6 +89,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[3]부분_3'
                     break
@@ -97,6 +101,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[4]부분_2'
                     break
@@ -110,6 +115,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[5]포함'
                     break
@@ -122,6 +128,7 @@ def partsys_3_search(df):
                         classifier_dict[key]['정리']
                     class_1[n] = classifier_dict[key]['기준1']
                     class_2[n] = classifier_dict[key]['기준2']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[6]교차'
                     break
@@ -131,14 +138,16 @@ def partsys_3_search(df):
                     audited[n] = classifier_dict[key]['기준1'] + f'({fr_list[n]})' if len(fr_list[n]) > 0 else \
                         classifier_dict[key]['기준1']
                     class_1[n] = classifier_dict[key]['기준1']
+                    class_3[n] = classifier_dict[key]['정리']
                     length_[n] = classifier_dict[key]['품명길이']
                     stage__[n] = '[7]대표'
                     break
     df['품명길이'] = length_
     df['기준1'] = class_1
     df['기준2'] = class_2
-    df['부품체계_3'] = audited
+    df['부품체계_3'] = class_3
     df['사정결과'] = stage__
+    df['부품체계_4'] = audited
 
     print(Counter(df['사정결과']))
     # print(Counter(df['기준1']))

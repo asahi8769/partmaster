@@ -75,4 +75,4 @@ additional_exceptions = ['AA', 'AB', 'ACCORDING', 'ACID', 'ACTR', 'ACU', 'ACUTAT
                          'PGU', 'PIT', 'QLE', 'QTC', 'QZE', 'RHD', 'ROF', 'RRC','R혼입', 'SEA', 'SIA', 'SIL', 'SLE',
                          'SOP', 'SWG', 'TON', 'TRK', 'UND', 'UPP', 'URG', 'VLV', 'WHE', 'WTS','含铸造', '捷喜爱', '未成型',
                          '耐克森', '龙口M','국내용','김동현', '김현우', '김현일', '김홍장', '부근에','유창근', '이동수','이상윤',
-                         '이승환','장형규',]
+                         '이승환','장형규', '입고검사', '자주검사', '합동검사', 'ADD', '전수', '전수검사']

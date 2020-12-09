@@ -2,6 +2,7 @@ import pandas as pd
 import warnings, os
 from utils.functions import show_elapsed_time
 from part_master import MasterDBStorage
+from utils.functions import remove_duplication
 
 
 class DomeFilter:
@@ -10,32 +11,35 @@ class DomeFilter:
     def __init__(self, type):
         table_name = 'master_' + type + '_spawn'
         self.spawn_name = rf'files\spawn\{type}_ranking.xlsx'
-        self.master_df = MasterDBStorage(table_name).df
+        self.master_df = MasterDBStorage(table_name, append_from_file=True).df
+
         self.master_df.fillna("", inplace=True)
-        self.master_df.apply(pd.to_numeric, errors='ignore')
         self.pre_processing()
         self.filtering()
-        print(self.master_df)
+        # print(self.master_df)
         print('Remaining Parts After Filtering :', len(self.master_df))
         self.grouping()
 
     def pre_processing(self):
-        self.master_df['최종입고일'] = [int(i.split('.')[0]) if i != '' else 0 for i in self.master_df['최종입고일'].tolist()]
+        self.master_df['최종입고일'] = [0 if i == "" else int(i) for i in self.master_df['최종입고일'].tolist()]
         self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
-        self.master_df['업체포장여부'] = ['True' if i == '1.0' else 'False' for i in self.master_df['업체포장여부'].tolist()]
+        self.master_df['업체포장여부'] = [1 if i == '1.0' else 0 for i in self.master_df['업체포장여부'].tolist()]
+
+        print(self.master_df['거래지속여부'].tolist())
 
     def filtering(self):
         filters = (
                 (self.master_df['최종입고일'] >= 20200601)
                 & (self.master_df['단중'] <= 4000)
                 & (self.master_df['단중'] > 0)
-                # & (self.master_df['업체포장여부'] != 'True')
-                # & (self.master_df['중점검사표유무'] == 'True')
-                & (self.master_df['거래지속여부'] == 'True')
+                # & (self.master_df['업체포장여부'] != 1)
+                & (self.master_df['중점검사표유무'] == 1)
+                & (self.master_df['거래지속여부'] == 1)
                 & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P'))|(self.master_df['포장장명'] == '아산3포장장'))
         )
         self.master_df = self.master_df[filters]
-        # print(self.master_df['포장장명'].tolist())
+        print(remove_duplication(self.master_df['포장장명'].tolist()))
+        print(remove_duplication(self.master_df['중박스코드'].tolist()))
 
     @show_elapsed_time
     def grouping(self):

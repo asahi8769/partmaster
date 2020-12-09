@@ -7,7 +7,7 @@ from utils.config import SQL_SCHEMA
 class MasterDBStorage:
     warnings.filterwarnings('ignore')
 
-    def __init__(self, name, append_from_file=True):
+    def __init__(self, name, append_from_file=False):
         self.table_name = name
         self.excel_name = rf'files\{self.table_name}.xlsx'
         self.db = "master.db"
@@ -72,10 +72,10 @@ class MasterDBStorage:
             cls.db_drop_table(name)
         except:
             pass
-        if df is None:
-            cls(name)
+        if df is not None:
+            cls(name, append_from_file=False).df_to_sql(df)
         else:
-            cls(name, append_from_file=True).df_to_sql(df)
+            cls(name, append_from_file=True)
 
 
 if __name__ == "__main__":
