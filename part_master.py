@@ -1,18 +1,17 @@
 from master_db import MasterDBStorage
+from rankings import RankFilter
 from utils.functions import show_elapsed_time
 import pandas as pd
 import warnings, os
 from collections import Counter
 from utils.config import APPEARANCE_DICT, PACKAGING_CENTER
 from searches.partsys_search import partsys_3_search
-from rankings import RankFilter
+
 
 
 class DomeMaster:
     warnings.filterwarnings('ignore')
     master_col = ['고객사', '차종', 'Part No', '부품명', '단위', '포장장', '납품업체', '납품업체명', '부품로트 대상여부']
-
-
 
     def __init__(self, d_type):
         self.type = d_type
@@ -34,7 +33,11 @@ class DomeMaster:
         self.packingspect_df = MasterDBStorage('전차종포장사양서', append_from_file=True).df
         self.spawn_name = rf'files\spawn\{self.type}_spawn.xlsx'
 
+    @show_elapsed_time
     def master_filter(self):
+        self.master_df['최종입고일'] = [0 if i == "" else int(i) for i in self.master_df['최종입고일'].tolist()]
+        self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
+
         self.filters = (
                 (self.master_df['최종입고일'] >= 20200601)
                 & (self.master_df['단중'] <= 4000)

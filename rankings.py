@@ -1,8 +1,8 @@
 import pandas as pd
 import warnings, os
 from utils.functions import show_elapsed_time
-from part_master import MasterDBStorage
-from utils.functions import remove_duplication
+from master_db import MasterDBStorage
+# from utils.functions import remove_duplication
 
 
 class RankFilter:
