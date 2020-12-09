@@ -25,7 +25,7 @@ class RankFilter:
         self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
         self.master_df['업체포장여부'] = [1 if i == '1.0' else 0 for i in self.master_df['업체포장여부'].tolist()]
 
-        print(self.master_df['거래지속여부'].tolist())
+        # print(self.master_df['거래지속여부'].tolist())
 
     def filtering(self):
         filters = (
@@ -43,14 +43,21 @@ class RankFilter:
 
     @show_elapsed_time
     def grouping(self):
-        criterion_list = list(filter(lambda x: x.startswith('외관') or x == '_외관불량유형수', self.master_df.columns.tolist()))
+        criterion_list = list(filter(lambda x: x.startswith('외관'), self.master_df.columns.tolist()))
         grouped_df_3 = self.master_df.groupby(['부품체계_3'])[criterion_list].apply(
             lambda x: x.astype(float).sum()).reset_index()
-        # grouped_df_4 = self.master_df.groupby(['부품체계_4'])[criterion_list].apply(
-        #     lambda x: x.astype(float).sum()).reset_index()
+        num_class = [0 for _ in grouped_df_3['부품체계_3'].tolist()]
+
+        for n in range(len(num_class)):
+             for j in criterion_list:
+                if grouped_df_3.loc[n, j] > 0:
+                    num_class[n] += 1
+
+        grouped_df_3['_외관불량유형수'] = num_class
+        grouped_df_3['_외관불량건수'] = grouped_df_3[criterion_list].sum(axis=1)
+
         with pd.ExcelWriter(self.spawn_name) as writer:
             grouped_df_3.to_excel(writer, sheet_name='부품체계_3_기준', index=False)
-            # grouped_df_4.to_excel(writer, sheet_name='부품체계_4_기준', index=False)
         os.startfile(self.spawn_name)
 
 

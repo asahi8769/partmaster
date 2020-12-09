@@ -229,8 +229,9 @@ class DomeMaster:
         item_dict_2 = {i : list() for i in df['Part No']}
         for n, i in enumerate (dom_insp_item):
             t = titles[n]
-            if t not in ['기능', '포장']:
+            if t not in ['기능', '포장'] and t not in item_dict_2[i]:
                 item_dict_2[i].append(titles[n])
+
         self.master_df['_외관불량상세'] = [','.join(i) if type(i) == list else i for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
         self.master_df['_외관불량유형수'] = [len(i) if type(i) == list else 0 for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
 
