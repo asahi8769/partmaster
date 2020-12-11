@@ -64,14 +64,8 @@ class Dataset:
         os.startfile(filename)
 
 
-
-
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    data = Dataset(file_path='files/불량유형수기정리.xlsx')
+    data = Dataset(file_path='files/불량유형수기정리.xlsx', spawn=True)
     df = data.get_dataframe()
-
-    # data.preprocess()
-
-    print(df.columns)
 
