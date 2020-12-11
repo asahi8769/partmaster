@@ -5,8 +5,9 @@ from utils.functions import show_elapsed_time
 
 
 class Dataset:
-    def __init__(self, file_path):
+    def __init__(self, file_path, spawn=False):
         self.file_path = file_path
+        self.spawn_file = spawn
         self.df = None
 
     @show_elapsed_time
@@ -15,7 +16,8 @@ class Dataset:
             self.df = pd.read_excel(file, usecols="F, H, K, L")
             self.df.rename(columns={'품번': 'Part No', '품명': '부품명', '불량구분': 'Target'}, inplace=True)
             self.preprocess()
-        self.spawn()
+        if self. spawn_file:
+            self.spawn()
         return self.df
 
     @show_elapsed_time
