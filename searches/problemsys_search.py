@@ -155,7 +155,7 @@ if __name__ == "__main__":
     print("Current working directory: {0}".format(os.getcwd()))
 
     def exp_data():
-        df = MasterDBStorage('해외불량이력').df
+        df = MasterDBStorage('해외불량이력', append_from_file=True).df
         df['품명'] = [i.upper() for i in df['품명'].tolist()]
         df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
         df.drop_duplicates(subset="Part No", keep='first', inplace=True)
@@ -168,8 +168,8 @@ if __name__ == "__main__":
         df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
         return df
 
-    # df = exp_data()
-    df = dom_data()
+    df = exp_data()
+    # df = dom_data()
     classifier_dict, key_sequence = problem_type_dict()
     df = problemsys_search(df, classifier_dict, key_sequence)
 

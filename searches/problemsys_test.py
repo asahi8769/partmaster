@@ -65,7 +65,7 @@ if __name__ == "__main__":
     print(problem_list[40:60])
     print(sum(list(Counter(df['불량구분'].tolist()).values())[0:40]) / len(df))
 
-    df = df[['불량구분', '제목', '부품체계_2', '제목_1', '제목_1_발생빈도', '불량정리', '불량구분결과']]
+    df = df[['불량구분', '제목', '부품체계_2', '제목_1', '불량정리', '불량구분결과']]
     df.drop_duplicates(subset="제목_1", keep='first', inplace=True)
 
     filename = "불량구분결과_test"
