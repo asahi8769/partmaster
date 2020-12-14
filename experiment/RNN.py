@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import os
+import torch.nn.functional as F
 
 
 class RNNModel(nn.Module):
@@ -15,7 +16,7 @@ class RNNModel(nn.Module):
         self.rnn = nn.LSTM(input_size=self.D_input, hidden_size=self.M_hidden, num_layers=self.L_rnnlayers,
                            batch_first=True)
         self.fc = nn.Linear(self.M_hidden, self.K_outputs)
-        self.checkpoint = os.path.join(os.getcwd(), 'models', self.__class__.__name__ + '_params.pt')
+        self.checkpoint = os.path.join(os.getcwd(),'files', 'models', self.__class__.__name__ + '_params.pt')
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
 
@@ -25,7 +26,8 @@ class RNNModel(nn.Module):
         out = self.embed(X)  # in : N*T, out: N*T*D
         out, _ = self.rnn(out, (h0, c0))  # in : N*T*D, out: N*T*M
         out, _ = torch.max(out, 1)  # in : N*T*M, out: N*M
-        return self.fc(out)  # in : N*M, out: N*K
+        out = self.fc(out)
+        return out  # in : N*M, out: N*K
 
     def save_checkpoint(self):
         print('... saving params ...')

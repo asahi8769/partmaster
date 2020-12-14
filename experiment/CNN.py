@@ -17,7 +17,7 @@ class CNNModel(nn.Module):
         self.pool2 = nn.MaxPool1d(2)
         self.conv3 = nn.Conv1d(64, 128, 3, padding=1)
         self.fc = nn.Linear(128, self.K_outputs)
-        self.checkpoint = os.path.join(os.getcwd(), 'models', self.__class__.__name__ + '_params.pt')
+        self.checkpoint = os.path.join(os.getcwd(),'files', 'models', self.__class__.__name__ + '_params.pt')
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
 
@@ -32,7 +32,8 @@ class CNNModel(nn.Module):
         out = self.conv3(out)  # N M3 T3
         out = out.permute(0, 2, 1)  # N T3 M3
         out, _ = torch.max(out, 1)  # N M3
-        return self.fc(out)  # N K
+        out = self.fc(out)
+        return out  # N K
 
     def save_checkpoint(self):
         print('... saving params ...')

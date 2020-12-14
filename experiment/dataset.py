@@ -141,6 +141,7 @@ class Dataset:
         self.df['encoded_target'] = [self.encoder.get(i, 1) for i in self.df['target']]
         self.df['encoded_target'] = [self.tar_encoder.get(i, 1) for i in self.df['target']]
         self.spawn()
+        print(len(self.tar_encoder.keys()))
 
     @show_elapsed_time
     def binary_text_dataset(self):
@@ -150,11 +151,12 @@ class Dataset:
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio )
         self.text.build_vocab(self.train_dataset)
         self.vocab = self.text.vocab
-        print(self.text.vocab.stoi)
+        self.encoder = self.text.vocab.stoi
+        self.decoder = self.text.vocab.itos
+        # print(self.decoder)
 
     def get_iter(self, batch_sizes=(32, 256)):
         train_iter, test_iter = ttd.Iterator.splits((self.train_dataset, self.test_dataset),
