@@ -144,7 +144,9 @@ class Dataset:
 
     @show_elapsed_time
     def binary_text_dataset(self):
-        self.text = ttd.Field(sequential=True, batch_first=True, lower=False, tokenize='spacy', pad_first=True)
+        self.text = ttd.Field(sequential=True, batch_first=True, lower=False,
+                              # tokenize='spacy',
+                              pad_first=True)
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
