@@ -29,6 +29,7 @@ class Dataset:
         # self.get_dataframe()  # csv파일을 업그레이드할때만 사용함
         # self.preprocess()
         # self.encode_data()
+        print(self.tar_decoder)
         self.binary_text_dataset()
 
     @show_elapsed_time

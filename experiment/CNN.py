@@ -5,8 +5,10 @@ import os
 
 
 class CNNModel(nn.Module):
-    def __init__(self, n_vocab, n_embedding, n_outputs):
+    def __init__(self, n_vocab, n_embedding, n_outputs, seed=0):
         super(CNNModel, self).__init__()
+        if seed is not None:
+            torch.manual_seed(0)
         self.V_vocab = n_vocab
         self.D_input = n_embedding
         self.K_outputs = n_outputs

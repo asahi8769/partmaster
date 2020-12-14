@@ -29,12 +29,12 @@ class ModelTrainer:
     def batch_learn(self):
         # for epoch in range(self.epochs):
         for epoch in range(self.epochs):
+            self.model.train()
             t0 = datetime.now()
             train_loss = []
             p_train = []
             y_train = []
             for inputs, targets in self.train_iter:
-                self.model.train()
                 targets = targets.view(-1, 1).squeeze(1).long()
                 self.optimizer.zero_grad()
                 y_pred = self.model(inputs)
@@ -61,11 +61,11 @@ class ModelTrainer:
 
     @torch.no_grad()
     def batch_test(self, epoch):
+        self.model.eval()
         test_loss = []
         p_test = []
         y_test = []
         for inputs, targets in self.test_iter:
-            self.model.eval()
             targets = targets.view(-1, 1).squeeze(1).long()
             y_pred = self.model(inputs)
             p_test += list(torch.argmax(y_pred, dim=1).to(self.device).detach().numpy())
