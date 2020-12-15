@@ -119,7 +119,7 @@ def preprocess(df):
     df['target'] = [str(i).replace(' ', '') for i in df['target'].tolist()]
     df['target_빈도'] = [Counter(df['target'].tolist())[i] for i in df['target'].tolist()]
     df['data'] = df['정리'] +' '+ df['부품체계_1'] +' '+ df['부품체계_2']+' '+ df['부품체계_3']
-    df['data'] = [str(i).replace(',', ' ') for i in df['data'].tolist()]
+    df['data'] = [re.sub("[\W]", "",str(i).replace(',', ' ')) for i in df['data'].tolist()]
     df['data_len'] = [len(i.split(' ')) for i in df['data'].tolist()]
     df_ = df[['부품명', 'Part No', '제목', '정리', '부품체계_1', '부품체계_2', '부품체계_3', 'data', 'target',
                        'target_빈도', 'data_len']]
