@@ -53,6 +53,7 @@ class Dataset:
             pickle.dump(self.text.vocab.stoi, f)
         with open('files/spawn/decoder.pkl', 'wb') as f:
             pickle.dump(self.text.vocab.itos, f)
+        print(self.text.vocab.stoi)
 
     @show_elapsed_time
     def save_target_encoder(self):
@@ -64,7 +65,7 @@ class Dataset:
                 idx += 1
         with open('files/spawn/tar_encoder.pkl', 'wb') as f:
             pickle.dump(self.tar_encoder, f)
-        print(self.tar_encoder)
+        # print(self.tar_encoder)
 
     @show_elapsed_time
     def save_target_decoder(self):
@@ -89,7 +90,7 @@ class Dataset:
                                           fields=[('data', self.text), ('encoded_target', self.label)])
         self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio)
 
-        self.text.build_vocab(self.train_dataset, min_freq=5, max_size=10000)
+        self.text.build_vocab(self.train_dataset, min_freq=3, max_size=700)
         self.save_encoder_decoder()
 
     def get_iter(self, batch_sizes=(32, 256)):

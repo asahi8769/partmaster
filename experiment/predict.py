@@ -70,5 +70,5 @@ class PredictionOnData:
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    model = CNNModel(n_vocab=500, n_embedding=128, n_outputs=512, seed=0)
+    model = CNNModel(n_vocab=700, n_embedding=128, n_outputs=512, seed=0)
     PredictionOnData('files/불량유형수기정리.xlsx', model=model)

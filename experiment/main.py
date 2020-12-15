@@ -7,7 +7,7 @@ import torch
 
 os.chdir(os.pardir)
 
-model = CNNModel(n_vocab=500, n_embedding=128, n_outputs=512, seed=0)
+model = CNNModel(n_vocab=700, n_embedding=128, n_outputs=512, seed=0)
 
 data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
 train_iter, test_iter = data.get_iter(batch_sizes=(32, 1000))
