@@ -4,11 +4,12 @@ from searches.partsys_search import partsys_3_search
 from utils.functions import show_elapsed_time
 import torchtext.data as ttd
 import torch
+import random
 
 #  데이터셋을 인코딩하고 이터레이터를 리턴하는 클래스를 만들고, 그 과정에서 백터라이징하는 딕셔너리는 따로 저장되도록 하자
 
 class Dataset:
-    def __init__(self, file_path, split_ratio=0.7):
+    def __init__(self, file_path, split_ratio=0.7, update_csv=False):
         self.split_ratio = split_ratio
         self.des_tokens = None
         self.tar_tokens = None
@@ -26,20 +27,20 @@ class Dataset:
         self.label = None
         self.dataset = None
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        # self.get_dataframe()  # csv파일을 업그레이드할때만 사용함
-        # self.preprocess()
-        # self.encode_data()
-        print(self.tar_decoder)
+        self.get_dataframe()
+        if update_csv:  # csv파일을 업그레이드할때만 사용함
+            self.preprocess()
+            self.encode_data()
         self.binary_text_dataset()
 
     @show_elapsed_time
     def get_dataframe(self):
         with open(self.file_path, 'rb') as file:
             self.df = pd.read_excel(file, usecols="F, H, K, L")
+            self.df.rename(columns={'품번': 'Part No', '품명': '부품명', '불량구분': 'target'}, inplace=True)
 
     @show_elapsed_time
     def preprocess(self,):
-        self.df.rename(columns={'품번': 'Part No', '품명': '부품명', '불량구분': 'target'}, inplace=True)
         self.partsys()
         part_list, supplier_list = get_basic_filters()
         words_to_skip = [i for i in part_list + supplier_list if i not in prob_words_not_to_skip]
@@ -67,7 +68,7 @@ class Dataset:
                            'target_빈도', 'data_len']]
         self.df.sort_values(['data_len', 'target_빈도'], inplace=True, ascending=[False, False])
         self.des_tokens = [str(i).split(' ') for i in self.df['data']]
-        self.tar_tokens = self.df['target'].tolist()
+
 
     @show_elapsed_time
     def partsys(self):
@@ -86,29 +87,19 @@ class Dataset:
         os.startfile(self.spawn_path)
 
     @show_elapsed_time
-    def get_longest_token(self):
-        return max(self.df['data_len'].tolist())
-
-    @show_elapsed_time
-    def get_encoder(self):
-        idx = 2
-        for word_list in self.des_tokens:
-            for word in word_list:
-                if word not in self.encoder:
-                    self.encoder[word] = idx
-                    idx += 1
+    def save_encoder(self):
         with open('files/spawn/encoder.pkl', 'wb') as f:
             pickle.dump(self.encoder, f)
 
     @show_elapsed_time
-    def get_decoder(self):
-        self.decoder = dict(zip(self.encoder.values(), self.encoder.keys()))
+    def save_decoder(self):
         with open('files/spawn/decoder.pkl', 'wb') as f:
             pickle.dump(self.decoder, f)
 
     @show_elapsed_time
-    def get_target_encoder(self):
+    def save_target_encoder(self):
         idx = 0
+        self.tar_tokens = self.df['target'].tolist()
         for word in self.tar_tokens:
             if word not in self.tar_encoder:
                 self.tar_encoder[word] = idx
@@ -117,51 +108,42 @@ class Dataset:
             pickle.dump(self.tar_encoder, f)
 
     @show_elapsed_time
-    def get_target_decoder(self):
+    def save_target_decoder(self):
         self.tar_decoder = dict(zip(self.tar_encoder.values(), self.tar_encoder.keys()))
         with open('files/spawn/tar_decoder.pkl', 'wb') as f:
             pickle.dump(self.tar_decoder, f)
 
     @show_elapsed_time
     def encode_data(self):
-        self.get_encoder()
-        self.get_decoder()
-        self.get_target_encoder()
-        self.get_target_decoder()
-        longest_len = self.get_longest_token()
-        encoded_doc = []
-        for word_list in self.des_tokens:
-            converted_word_list = []
-            for i in range(longest_len - len(word_list)):
-                converted_word_list.append(0)
-            for word in word_list:
-                converted_word_list.append(self.encoder.get(word, 1))
-            encoded_doc.append(converted_word_list)
-
-        self.df['encoded_data'] = [', '.join([str(j) for j in i]) for i in encoded_doc]
+        self.save_target_encoder()
+        self.save_target_decoder()
         self.df['encoded_target'] = [self.encoder.get(i, 1) for i in self.df['target']]
         self.df['encoded_target'] = [self.tar_encoder.get(i, 1) for i in self.df['target']]
-        self.spawn()
-        print(len(self.tar_encoder.keys()))
+        # self.spawn()
 
     @show_elapsed_time
     def binary_text_dataset(self):
+        torch.random.manual_seed(42)
         self.text = ttd.Field(sequential=True, batch_first=True, lower=False,
-                              # tokenize='spacy',
+                              tokenize=str.split,
                               pad_first=True)
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
-        self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio )
-        self.text.build_vocab(self.train_dataset)
-        self.vocab = self.text.vocab
+        self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio)
+
+        self.text.build_vocab(self.train_dataset ,min_freq=5, max_size=10000)
         self.encoder = self.text.vocab.stoi
+        # print(list(self.text))
+        # print(self.encoder['INTERFERENCE'])
         self.decoder = self.text.vocab.itos
-        # print(self.decoder)
+        self.save_encoder()
+        self.save_decoder()
+        self.save_target_encoder()
+        self.save_target_decoder()
 
     def get_iter(self, batch_sizes=(32, 256)):
-        train_iter, test_iter = ttd.Iterator.splits((self.train_dataset, self.test_dataset),
-                                                    sort_key=lambda x: len(x.data),
+        train_iter, test_iter = ttd.Iterator.splits((self.train_dataset, self.test_dataset), sort_key=lambda x: len(x.data),
                                                     batch_sizes=batch_sizes, device=self.device)
         return train_iter, test_iter
 

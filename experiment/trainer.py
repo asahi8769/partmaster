@@ -6,15 +6,14 @@ import pickle, os
 from datetime import datetime
 import torch.nn.functional as F
 
+
 class ModelTrainer:
     def __init__(self, model, train_iter, test_iter, lr=0.01, epochs=200):
         self.lr = lr
         self.model = model
         self.epochs = epochs
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(),
-                                          lr=self.lr
-                                          )
+        self.optimizer = torch.optim.Adam(model.parameters(),lr=self.lr)
         self.train_iter, self.test_iter = train_iter, test_iter
         self.train_losses = np.zeros(self.epochs)
         self.test_losses = np.zeros(self.epochs)
