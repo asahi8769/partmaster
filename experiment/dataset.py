@@ -38,7 +38,7 @@ class Dataset:
     def get_dataframe(self):
         with open(self.file_path, 'rb') as file:
             self.df = pd.read_excel(file, usecols="F, H, K, L")
-            self.df.rename(columns={'품번': 'Part No', '품명': '부품명', '불량구분': 'target'}, inplace=True)
+            self.df.rename(columns={'품번': 'Part No', '품명': '부품명', '수기불량구분': 'target'}, inplace=True)
 
     @show_elapsed_time
     def preprocess(self,):
@@ -69,7 +69,6 @@ class Dataset:
                            'target_빈도', 'data_len']]
         self.df.sort_values(['data_len', 'target_빈도'], inplace=True, ascending=[False, False])
         self.des_tokens = [str(i).split(' ') for i in self.df['data']]
-
 
     @show_elapsed_time
     def partsys(self):
@@ -135,7 +134,7 @@ class Dataset:
                                           fields=[('data', self.text), ('encoded_target', self.label)])
         self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio)
 
-        self.text.build_vocab(self.train_dataset ,min_freq=5, max_size=10000)
+        self.text.build_vocab(self.train_dataset, min_freq=5, max_size=10000)
         self.encoder = self.text.vocab.stoi
         self.decoder = self.text.vocab.itos
         # print(self.encoder)

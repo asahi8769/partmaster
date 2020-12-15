@@ -10,12 +10,11 @@ os.chdir(os.pardir)
 
 model = CNNModel(n_vocab=500, n_embedding=128, n_outputs=512, seed=0)
 
-data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
-train_iter, test_iter = data.get_iter(batch_sizes=(32, 1000))
-
-trainer = ModelTrainer(model, train_iter, test_iter, lr=0.0001, epochs=100)
-trainer.batch_learn()
-trainer.plot_result()
+# data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
+# train_iter, test_iter = data.get_iter(batch_sizes=(32, 1000))
+# trainer = ModelTrainer(model, train_iter, test_iter, lr=0.0001, epochs=100)
+# trainer.batch_learn()
+# trainer.plot_result()
 
 
 sentence1 = 'WRONG SPEC PROBLEM POWER TRAIN & CHASSIS-ETC AUTOMATIC T/M OVER DRIVER 노브&부트'
@@ -24,7 +23,6 @@ sentence3 = 'SCRATCHES SEALANT TORQUE PROBLEM MISS EXCESS PAINT LEAK ENGINE CYLI
 
 with open('files/spawn/tar_decoder.pkl', 'rb') as file:
     tar_dict = pickle.load(file)
-    print(tar_dict)
 
 with open('files/spawn/encoder.pkl', 'rb') as file:
     encoder = pickle.load(file)
