@@ -83,7 +83,7 @@ class Dataset:
     def binary_text_dataset(self):
         self.text = ttd.Field(sequential=True, batch_first=True, lower=False,
                               tokenize=str.split,
-                              pad_first=True)
+                              pad_first=True, fix_length=15)
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
@@ -142,8 +142,8 @@ def partsys(df):
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    # data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=True)
-    data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
+    data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=True)
+    # data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
     # data.encode_data()
     # print(data.tokens)
 

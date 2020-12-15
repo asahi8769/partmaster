@@ -11,7 +11,7 @@ model = CNNModel(n_vocab=500, n_embedding=128, n_outputs=512, seed=0)
 
 data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
 train_iter, test_iter = data.get_iter(batch_sizes=(32, 1000))
-trainer = ModelTrainer(model, train_iter, test_iter, lr=0.0001, epochs=200)
+trainer = ModelTrainer(model, train_iter, test_iter, lr=0.00005, epochs=500)
 trainer.batch_learn()
 trainer.plot_result()
 
