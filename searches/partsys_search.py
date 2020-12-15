@@ -40,6 +40,7 @@ def preprocess(df, namelist):
 
     df['품명단어'] = [', '.join(i) for i in word_list]
     df['리어프론트'] = fr_list
+    # print(fr_list)
     return df
 
 
@@ -49,6 +50,7 @@ def partsys_3_search(df):
     df = preprocess(df, namelist)
 
     fr_list = df['리어프론트'].tolist()
+    # print(fr_list)
 
     audited = ["" for _ in namelist]
     class_1 = ["" for _ in namelist]
@@ -164,7 +166,7 @@ if __name__ == "__main__":
     print("Current working directory: {0}".format(os.getcwd()))
 
     def master_data():
-        df = MasterDBStorage('파트마스터').df
+        df = MasterDBStorage('파트마스터', append_from_file=True).df
         df['품명'] = [i.upper() for i in df['품명'].tolist()]
         df.drop_duplicates(subset="품번", keep='first', inplace=True)
         df.drop_duplicates(subset="품명", keep='first', inplace=True)
@@ -172,7 +174,7 @@ if __name__ == "__main__":
 
 
     def exp_data():
-        df = MasterDBStorage('해외불량이력').df
+        df = MasterDBStorage('해외불량이력', append_from_file=True).df
         df['품명'] = [i.upper() for i in df['품명'].tolist()]
         df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
         df.drop_duplicates(subset="Part No", keep='first', inplace=True)
@@ -181,13 +183,13 @@ if __name__ == "__main__":
 
 
     def dom_data():
-        df = MasterDBStorage('입고불량이력').df
-        df['품명'] = [i.upper() for i in df['품명'].tolist()]
+        df = MasterDBStorage('입고불량이력', append_from_file=True).df
+        df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
         return df
 
     # df = master_data()
-    # df = dom_data()
-    df = exp_data()
+    df = dom_data()
+    # df = exp_data()
     classifier_dict, keylist = part_type_3_dict()
     df = partsys_3_search(df)
 
@@ -199,7 +201,7 @@ if __name__ == "__main__":
     df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
     df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
 
-    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '사정결과', '부품체계_1', '부품체계_2', ]]
+    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '부품체계_4', '사정결과', '부품체계_1', '부품체계_2', ]]
 
     filename = "품목구분결과_test"
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:

@@ -31,7 +31,8 @@ class Dataset:
         if update_csv:  # csv파일을 업그레이드할때만 사용함
             self.preprocess()
             self.encode_data()
-        self.binary_text_dataset()
+        else:
+            self.binary_text_dataset()
 
     @show_elapsed_time
     def get_dataframe(self):
@@ -106,12 +107,15 @@ class Dataset:
                 idx += 1
         with open('files/spawn/tar_encoder.pkl', 'wb') as f:
             pickle.dump(self.tar_encoder, f)
+        # print(self.tar_encoder)
 
     @show_elapsed_time
     def save_target_decoder(self):
         self.tar_decoder = dict(zip(self.tar_encoder.values(), self.tar_encoder.keys()))
         with open('files/spawn/tar_decoder.pkl', 'wb') as f:
             pickle.dump(self.tar_decoder, f)
+        print("decoder part")
+        # print(self.tar_decoder)
 
     @show_elapsed_time
     def encode_data(self):
@@ -119,11 +123,10 @@ class Dataset:
         self.save_target_decoder()
         self.df['encoded_target'] = [self.encoder.get(i, 1) for i in self.df['target']]
         self.df['encoded_target'] = [self.tar_encoder.get(i, 1) for i in self.df['target']]
-        # self.spawn()
+        self.spawn()
 
     @show_elapsed_time
     def binary_text_dataset(self):
-        torch.random.manual_seed(42)
         self.text = ttd.Field(sequential=True, batch_first=True, lower=False,
                               tokenize=str.split,
                               pad_first=True)
@@ -134,13 +137,10 @@ class Dataset:
 
         self.text.build_vocab(self.train_dataset ,min_freq=5, max_size=10000)
         self.encoder = self.text.vocab.stoi
-        # print(list(self.text))
-        # print(self.encoder['INTERFERENCE'])
         self.decoder = self.text.vocab.itos
+        # print(self.encoder)
         self.save_encoder()
         self.save_decoder()
-        self.save_target_encoder()
-        self.save_target_decoder()
 
     def get_iter(self, batch_sizes=(32, 256)):
         train_iter, test_iter = ttd.Iterator.splits((self.train_dataset, self.test_dataset), sort_key=lambda x: len(x.data),
@@ -150,7 +150,8 @@ class Dataset:
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    data = Dataset(file_path='files/불량유형수기정리.xlsx')
+    # data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=True)
+    data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
     # data.encode_data()
     # print(data.tokens)
 

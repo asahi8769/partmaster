@@ -54,7 +54,8 @@ class ModelTrainer:
             print(f'Epoch : {epoch + 1}/{self.epochs}, Train Loss : {self.train_losses[epoch]:.4f}, '
                   f'Train Acc : {self.train_accs[epoch]:.4f}, Test Loss : {self.test_losses[epoch]:.4f}, '
                   f'Test Acc : {self.test_accs[epoch]:.4f}, Duration : {dt}')
-            if self.minloss_bestacc is None or self.minloss_bestacc[1] < self.test_accs[epoch]:
+            if self.minloss_bestacc is None or (self.minloss_bestacc[1] < self.test_accs[epoch] and
+                                                self.minloss_bestacc[0] > self.test_losses[epoch]):
                 self.save_minloss([self.test_losses[epoch], self.test_accs[epoch]])
         # return p_train, y_train, p_test, y_test
 
