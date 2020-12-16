@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle, os
 from datetime import datetime
-import torch.nn.functional as F
+from experiment.config import *
 
 
 class ModelTrainer:
-    def __init__(self, model, train_iter, test_iter, lr=0.01, epochs=200):
+    def __init__(self, model, train_iter, test_iter, lr=lr, epochs=epochs):
         self.lr = lr
         self.model = model
         self.epochs = epochs
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(),lr=self.lr)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
         self.train_iter, self.test_iter = train_iter, test_iter
         self.train_losses = np.zeros(self.epochs)
         self.test_losses = np.zeros(self.epochs)
@@ -48,16 +48,24 @@ class ModelTrainer:
             y_train = np.array(y_train)
             self.train_losses[epoch] = np.mean(train_loss)
             self.train_accs[epoch] = np.mean(y_train == p_train)
-            p_test, y_test = self.batch_test(epoch)
             self.batch_test(epoch)
             dt = datetime.now() - t0
             print(f'Epoch : {epoch + 1}/{self.epochs}, Train Loss : {self.train_losses[epoch]:.4f}, '
                   f'Train Acc : {self.train_accs[epoch]:.4f}, Test Loss : {self.test_losses[epoch]:.4f}, '
                   f'Test Acc : {self.test_accs[epoch]:.4f}, Duration : {dt}')
-            if self.minloss_bestacc is None or (self.minloss_bestacc[1] < self.test_accs[epoch] and
-                                                self.minloss_bestacc[0] > self.test_losses[epoch]):
+
+            if self.minloss_bestacc is None:
                 self.save_minloss([self.test_losses[epoch], self.test_accs[epoch]])
-        # return p_train, y_train, p_test, y_test
+            elif self.minloss_bestacc[1] < self.test_accs[epoch] and self.minloss_bestacc[0] > self.test_losses[epoch]:
+                print(f"Acc increased from {self.minloss_bestacc[1]} to {self.test_accs[epoch]}")
+                print(f"Loss decreased from {self.minloss_bestacc[0]} to {self.test_losses[epoch]}")
+                self.save_minloss([self.test_losses[epoch], self.test_accs[epoch]])
+            elif self.minloss_bestacc[1] < self.test_accs[epoch]:
+                print(f"Acc increased from {self.minloss_bestacc[1]} to {self.test_accs[epoch]}")
+                self.save_minloss([self.minloss_bestacc[0], self.test_accs[epoch]])
+            elif self.minloss_bestacc[0] > self.test_losses[epoch]:
+                print(f"Loss decreased from {self.minloss_bestacc[0]} to {self.test_losses[epoch]}")
+                self.save_minloss([self.test_losses[epoch], self.minloss_bestacc[1]])
 
     @torch.no_grad()
     def batch_test(self, epoch):
@@ -79,9 +87,15 @@ class ModelTrainer:
         return p_test, y_test
 
     def plot_result(self):
-        plt.plot(self.train_losses, label='training loss')
-        plt.plot(self.test_losses, label='test loss')
-        plt.legend()
+        plt.figure(figsize=(10, 5))
+        ax1 = plt.subplot(1, 2, 1)
+        ax1.plot(self.train_losses, label='training loss')
+        ax1.plot(self.test_losses, label='test loss')
+        ax1.legend()
+        ax2 = plt.subplot(1, 2, 2)
+        ax2.plot(self.train_accs, label='training accs')
+        ax2.plot(self.test_accs, label='test accs')
+        ax2.legend()
         plt.tight_layout()
         plt.show()
 
@@ -95,8 +109,7 @@ class ModelTrainer:
         try:
             with open(self.best_param_pkl, 'rb') as file:
                 self.minloss_bestacc = pickle.load(file)
-
         except FileNotFoundError as e:
             self.minloss_bestacc = None
         else:
-            print(f'... loading minimal loss {self.minloss_bestacc} ...')
+            print(f'... loading best loss, acc {self.minloss_bestacc} ...')

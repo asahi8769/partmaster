@@ -4,11 +4,11 @@ from searches.partsys_search import partsys_3_search
 from utils.functions import show_elapsed_time
 import torchtext.data as ttd
 import torch
-import random
+from experiment.config import *
 
 
 class Dataset:
-    def __init__(self, file_path, split_ratio=0.7, update_csv=False):
+    def __init__(self, file_path, split_ratio=split_ratio, update_csv=False):
         self.split_ratio = split_ratio
         self.tar_tokens = None
         self.document = None
@@ -27,19 +27,20 @@ class Dataset:
         self.df = self.get_dataframe()
         self.save_target_encoder()
         self.save_target_decoder()
-        if update_csv:  # csv파일을 업그레이드할때만 사용함
+        if update_csv:  # csv파일과 타깃 인코더를 업그레이드할때만 사용함
             self.df = partsys(self.df)
             self.df = preprocess(self.df)
-            self.encode_data()
+            self.encode_target()
+            self.spawn()
         else:
-            self.binary_text_dataset()
+            self.encode_dataset()
 
 
     @show_elapsed_time
     def get_dataframe(self):
         with open(self.file_path, 'rb') as file:
             df = pd.read_excel(file, usecols="F, H, K, L")
-            df.rename(columns={'품번': 'Part No', '품명': '부품명', '수기불량구분': 'target'}, inplace=True)
+            df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
         return df
 
     @show_elapsed_time
@@ -76,21 +77,20 @@ class Dataset:
         # print(self.tar_decoder)
 
     @show_elapsed_time
-    def encode_data(self):
+    def encode_target(self):
         self.df['encoded_target'] = [self.tar_encoder.get(i, 0) for i in self.df['target']]
-        self.spawn()
 
     @show_elapsed_time
-    def binary_text_dataset(self):
+    def encode_dataset(self):
         self.text = ttd.Field(sequential=True, batch_first=True, lower=False,
                               tokenize=str.split,
-                              pad_first=True, fix_length=15)
+                              pad_first=True, fix_length=fix_length)
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
         self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio)
 
-        self.text.build_vocab(self.train_dataset, min_freq=3, max_size=700)
+        self.text.build_vocab(self.dataset, min_freq=3, max_size=n_vocab)
         self.save_encoder_decoder()
 
     def get_iter(self, batch_sizes=(32, 256)):
@@ -99,7 +99,7 @@ class Dataset:
         return train_iter, test_iter
 
 
-def preprocess(df):
+def preprocess(df, for_train=True):
     part_list, supplier_list = get_basic_filters()
     words_to_skip = [i for i in part_list + supplier_list if i not in prob_words_not_to_skip]
     words_to_skip += prob_additional_exceptions
@@ -117,15 +117,17 @@ def preprocess(df):
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
     df['정리'] = [' '.join(i) for i in word_list]
-    df['target'] = [str(i).replace(' ', '') for i in df['target'].tolist()]
-    df['target_빈도'] = [Counter(df['target'].tolist())[i] for i in df['target'].tolist()]
-    df['data'] = df['정리'] +' '+ df['부품체계_1'] +' '+ df['부품체계_2']+' '+ df['부품체계_3']
-    df['data'] = [re.sub("[,.\-_&]", "",str(i)).replace("  ", " ") for i in df['data'].tolist()]
+    df['data'] = df['정리'] + ' ' + df['부품체계_1'] + ' ' + df['부품체계_2'] + ' ' + df['부품체계_3']
+    df['data'] = [re.sub("[,.\-_&]", "", str(i)).replace("  ", " ") for i in df['data'].tolist()]
     df['data_len'] = [len(i.split(' ')) for i in df['data'].tolist()]
-    df_ = df[['부품명', 'Part No', '제목', '정리', '부품체계_1', '부품체계_2', '부품체계_3', 'data', 'target',
-                       'target_빈도', 'data_len']]
-    # df_.sort_values(['data_len', 'target_빈도'], inplace=True, ascending=[False, False])
-    return df_
+    if for_train:
+        df['target'] = [str(i).replace(' ', '') for i in df['target'].tolist()]
+        df['target_빈도'] = [Counter(df['target'].tolist())[i] for i in df['target'].tolist()]
+        df_ = df[['부품명', 'Part No', '제목', '정리', '부품체계_1', '부품체계_2', '부품체계_3', 'data', 'target',
+                           'target_빈도', 'data_len']]
+        return df_
+    else:
+        return df
 
 
 @show_elapsed_time
