@@ -10,7 +10,7 @@ os.chdir(os.pardir)
 model = CNNModel(n_vocab=n_vocab, n_embedding=n_embedding, n_outputs=n_outputs, seed=0)
 # model.load_checkpoint()
 
-data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
+data = Dataset(file_path=file_path, update_csv=False)
 train_iter, test_iter = data.get_iter(batch_sizes=(32, 256))
 trainer = ModelTrainer(model, train_iter, test_iter, lr=lr, epochs=epochs)
 trainer.batch_learn()
@@ -23,6 +23,7 @@ sentence3 = 'SCRATCHES SEALANT TORQUE PROBLEM MISS EXCESS PAINT LEAK ENGINE CYLI
 
 with open('files/spawn/tar_decoder.pkl', 'rb') as file:
     tar_dict = pickle.load(file)
+    print(tar_dict)
 
 with open('files/spawn/encoder.pkl', 'rb') as file:
     encoder = pickle.load(file)

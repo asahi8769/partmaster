@@ -39,8 +39,10 @@ class Dataset:
     @show_elapsed_time
     def get_dataframe(self):
         with open(self.file_path, 'rb') as file:
-            df = pd.read_excel(file, usecols="F, H, K, L")
+            # df = pd.read_excel(file, usecols="F, H, K, L")
+            df = pd.read_excel(file)
             df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
+            print(df)
         return df
 
     @show_elapsed_time
@@ -54,7 +56,7 @@ class Dataset:
             pickle.dump(self.text.vocab.stoi, f)
         with open('files/spawn/decoder.pkl', 'wb') as f:
             pickle.dump(self.text.vocab.itos, f)
-        print(self.text.vocab.stoi)
+        # print(self.text.vocab.stoi)
 
     @show_elapsed_time
     def save_target_encoder(self):
@@ -66,7 +68,7 @@ class Dataset:
                 idx += 1
         with open('files/spawn/tar_encoder.pkl', 'wb') as f:
             pickle.dump(self.tar_encoder, f)
-        # print(self.tar_encoder)
+        print("Target :",len(self.tar_encoder.keys()),"classes")
 
     @show_elapsed_time
     def save_target_decoder(self):
@@ -145,7 +147,7 @@ def partsys(df):
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=True)
+    data = Dataset(file_path=file_path, update_csv=True)
     # data = Dataset(file_path='files/불량유형수기정리.xlsx', update_csv=False)
     # data.encode_data()
     # print(data.tokens)

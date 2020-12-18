@@ -60,9 +60,9 @@ class ModelTrainer:
                 print(f"Acc increased from {self.minloss_bestacc[1]} to {self.test_accs[epoch]}")
                 print(f"Loss decreased from {self.minloss_bestacc[0]} to {self.test_losses[epoch]}")
                 self.save_minloss([self.test_losses[epoch], self.test_accs[epoch]])
-            elif self.minloss_bestacc[1] < self.test_accs[epoch]:
-                print(f"Acc increased from {self.minloss_bestacc[1]} to {self.test_accs[epoch]}")
-                self.save_minloss([self.minloss_bestacc[0], self.test_accs[epoch]])
+            # elif self.minloss_bestacc[1] < self.test_accs[epoch]:
+            #     print(f"Acc increased from {self.minloss_bestacc[1]} to {self.test_accs[epoch]}")
+            #     self.save_minloss([self.minloss_bestacc[0], self.test_accs[epoch]])
             elif self.minloss_bestacc[0] > self.test_losses[epoch]:
                 print(f"Loss decreased from {self.minloss_bestacc[0]} to {self.test_losses[epoch]}")
                 self.save_minloss([self.test_losses[epoch], self.minloss_bestacc[1]])
