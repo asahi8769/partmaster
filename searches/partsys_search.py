@@ -25,7 +25,8 @@ def preprocess(df, namelist):
                      'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T',
                      'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE', 'QY', 'SPORTAGE', 'SONATA', 'LF', 'ACCENT', 'HYUNDAI', 'KIA',
                      'RIO', 'TUCSON', 'SOLATI', 'KD', 'ASM', 'TL/QL', 'CEED', 'FORTE', 'LIMITED', 'CRETA', 'SANTAFE',
-                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT', "NX", "SC", "IQP", "LSU"]
+                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT', "NX", "SC", "IQP", "LSU",
+                     "SLZ", "IP", "FT", "PE", "GB", "YP", "TRK", "BUS"]
 
     for n, i in enumerate(namelist):
         name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace("`", "").replace(".", "")
