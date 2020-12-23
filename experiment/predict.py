@@ -49,6 +49,7 @@ class PredictionOnData:
         self.df.to_csv(self.spawn_path, index=False, encoding='utf-8-sig')
         os.startfile(self.spawn_path)
 
+    @show_elapsed_time
     def encode(self):
         with torch.no_grad():
             self.model.load_checkpoint()
