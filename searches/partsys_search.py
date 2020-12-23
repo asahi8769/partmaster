@@ -25,7 +25,7 @@ def preprocess(df, namelist):
                      'STDB', 'COMPLETE', 'COMPL', 'ASSSY', 'QL', 'QLE', 'TL', 'TLE', 'TLZ', 'AT', 'A/T', 'MT', 'M/T',
                      'PD', 'PDE', 'SL', 'SLE', 'TL', 'TLE', 'QY', 'SPORTAGE', 'SONATA', 'LF', 'ACCENT', 'HYUNDAI', 'KIA',
                      'RIO', 'TUCSON', 'SOLATI', 'KD', 'ASM', 'TL/QL', 'CEED', 'FORTE', 'LIMITED', 'CRETA', 'SANTAFE',
-                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT']
+                     'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT', "NX", "SC", "IQP", "LSU"]
 
     for n, i in enumerate(namelist):
         name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace("’", "").replace("`", "").replace(".", "")
@@ -205,5 +205,6 @@ if __name__ == "__main__":
 
     filename = "품목구분결과_test"
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:
+        df.drop_duplicates(subset="품명단어", keep='first', inplace=True)
         df.to_excel(writer, sheet_name='품번체계', index=False)
     os.startfile(rf'files\spawn\{filename}.xlsx')
