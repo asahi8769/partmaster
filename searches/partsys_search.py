@@ -1,4 +1,4 @@
-import re
+import re, pickle
 import pandas as pd
 from collections import Counter
 
@@ -166,6 +166,16 @@ if __name__ == "__main__":
     os.chdir(os.pardir)
     print("Current working directory: {0}".format(os.getcwd()))
 
+
+    def load_wpcdict():
+        try :
+            with open('files/spawn/wpc_part.pkl', 'rb') as file:
+                wpc_dict = pickle.load(file)
+            return wpc_dict
+        except FileNotFoundError:
+            return dict()
+
+
     def master_data():
         df = MasterDBStorage('파트마스터', append_from_file=True).df
         df['품명'] = [i.upper() for i in df['품명'].tolist()]
@@ -189,10 +199,15 @@ if __name__ == "__main__":
         return df
 
     # df = master_data()
-    df = dom_data()
-    # df = exp_data()
+    # df = dom_data()
+    df = exp_data()
+    df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
+    df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
+    df.drop_duplicates(subset="Part No", keep='first', inplace=True)
+
     classifier_dict, keylist = part_type_3_dict()
     df = partsys_3_search(df)
+    wpc_dict = load_wpcdict()
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
         df_1 = pd.read_excel(file, sheet_name='부품체계1')
@@ -201,8 +216,9 @@ if __name__ == "__main__":
     partsys_2_dict = {str(p): df_2['부품구분'].tolist()[n] for n, p in enumerate(df_2['품번'].tolist())}
     df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
     df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
+    df['wpc'] = [wpc_dict.get(i, '') for i in df['Part No'].tolist()]
 
-    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '부품체계_4', '사정결과', '부품체계_1', '부품체계_2', ]]
+    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '부품체계_4', '사정결과', '부품체계_1', '부품체계_2', 'wpc']]
 
     filename = "품목구분결과_test"
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:

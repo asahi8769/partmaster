@@ -68,6 +68,18 @@ def show_elapsed_time(function):
     return wrapper
 
 
+def try_until_success(function):
+    def wrapper(*args, **kwargs):
+        while True:
+            try:
+                returns = function(*args, **kwargs)
+            except Exception as e:
+                print(f"{function.__name__} failed. Trying Again...")
+            else :
+                return returns
+    return wrapper
+
+
 def flatten(ls):
     """
     ls : list

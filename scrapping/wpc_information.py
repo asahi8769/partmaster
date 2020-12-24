@@ -7,21 +7,41 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
+from utils.functions import try_until_success
+from master_db import MasterDBStorage
 
-import re
-
-import os
+import re, os, pickle, time
+from tqdm import tqdm
 
 
 class WPCPartsNames:
-    def __init__(self):
+    def __init__(self, df, visible=False):
+        self.df = df
+        self.df_part_list = df['Part No'].tolist()
+        # print(self.df_part_list)
+        self.wpc_dict = self.load_wpcdict()
         GC_DRIVER = 'driver/chromedriver.exe'
         CHROME_OPTIONS = Chrome_options()
         CHROME_OPTIONS.add_argument("--start-maximized")
-        # CHROME_OPTIONS.add_argument("--headless")
+        if not visible:
+            CHROME_OPTIONS.add_argument("--headless")
+            CHROME_OPTIONS.add_argument("--disable-gpu")
+
         LOGIN_URL = "https://wpc.mobis.co.kr/Login.jsp"
         self.driver = webdriver.Chrome(GC_DRIVER, options=CHROME_OPTIONS)
         self.driver.get(LOGIN_URL)
+
+    def load_wpcdict(self):
+        try :
+            with open('files/spawn/wpc_part.pkl', 'rb') as file:
+                wpc_dict = pickle.load(file)
+            return wpc_dict
+        except FileNotFoundError:
+            return dict()
+
+    def save_wpcdict(self):
+        with open('files/spawn/wpc_part.pkl', 'wb') as f:
+            pickle.dump(self.wpc_dict, f)
 
     def click_element_id(self, ID, sec):
         try:
@@ -31,47 +51,65 @@ class WPCPartsNames:
         except TimeoutException:
             pass
 
+    @try_until_success
     def log_in(self):
-        id_box = self.driver.find_element_by_id('chkID')
-        login_button = self.driver.find_element_by_id('logon')
+        id_box = WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(
+            (By.XPATH, "/html/body/div[3]/div[2]/div[2]/form/table/tbody/tr[1]/td[1]/input")))
+        login_button = WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(
+            (By.XPATH, "html/body/div[3]/div[2]/div[2]/form/table/tbody/tr[1]/td[2]/button")))
         id_box.send_keys("1300687")
         ActionChains(self.driver).send_keys(Keys.TAB).send_keys("g202001001*").perform()
         login_button.click()
+        WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(
+            (By.XPATH, "/html/body/div[2]/div/div[1]/div[1]/table/tbody/tr/td[7]/div/img")))
+        print("Logged in Successfully")
 
-    def input_partnumber(self, partnumbers):
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.ID, "m_sBtn_Partslist")))
-        # pn_box = self.driver.find_element_by_id('Parts')
-        # pn_box.send_keys(partnumbers)
-        # search_btn = self.driver.find_element_by_id('m_sBtn_Partslist')
-        # search_btn.click()
-        # soup = BeautifulSoup(self.driver.page_source, 'lxml')
-        new_url = "https://wpc.mobis.co.kr/Parts?cmd=getPartsList2&ptno="+partnumbers+"&pncd=&lang=KR&page=1&hkgb=A&regns=AUS%2CCAN%2CDOM%2CEUR%2CGEN%2CMES%2CTUR%2CUSA&views=Y&sgmts=E%2CJ%2CN%2CR"
-        self.driver.get(new_url)
-
-        html = self.driver.page_source
-        parsed_html = BeautifulSoup(html, features="lxml")
-        text = parsed_html.body.text
-        text = str(text).replace("－", "_")
+    def search_part_info(self, partnumbers):
+        search_url = "https://wpc.mobis.co.kr/Parts?cmd=getPartsList2&ptno="+partnumbers+\
+                  "&pncd=&lang=KR&page=1&hkgb=A&regns=AUS%2CCAN%2CDOM%2CEUR%2CGEN%2CMES%2CTUR%2CUSA&views=Y&sgmts=E%2CJ%2CN%2CR"
+        self.driver.get(search_url)
+        html = BeautifulSoup(self.driver.page_source, features="lxml")
+        text = html.body.text.replace("－", "_").replace("-", "_")
         text = re.sub("[:@\s]", "", text)
         text = re.sub("[\\\\]", ",", text)
-        print("")
-        part_list = [i.split(r",") for i in text.split(r"^") if len(i[3])>1]
-        print(part_list)
+        return [j for j in [i.split(",") for i in text.split(",^")] if j[0] is not '']
 
-        # extracted = re.sub("[:\\\\^@0-9]", "", text)
-        # print(parsed_html)
-        # print(text)
-        # print(extracted)
-        #
-        # input("terminate")
-        #
-        # tables = soup.find_all('table')
-        # print(tables)
+    def iterative_search(self):
+        n = 0
+        for i in tqdm(self.df_part_list):
+            n += 1
+            if i in self.wpc_dict.keys():
+                # print(f"{i} is already registered. {self.wpc_dict[i]}")
+                continue
+            info = self.search_part_info(i)
+            try :
+                # print(i[:10], info[0][3])
+                self.wpc_dict[i] = info[0][3]
+            except IndexError :
+                # print(i[:10], info)
+                self.wpc_dict[i] = 'no_result'
+            if n % 20 == 0:
+                time.sleep(0.5)
+                self.save_wpcdict()
+        self.save_wpcdict()
+
+
+def dom_data():
+    df = MasterDBStorage('입고불량이력', append_from_file=True).df
+    df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
+    df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
+    df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
+    df.drop_duplicates(subset="Part No", keep='first', inplace=True)
+    return df
 
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
+    df = dom_data()
 
-    obj = WPCPartsNames()
+    obj = WPCPartsNames(df, visible=False)
     obj.log_in()
-    obj.input_partnumber("37160")
+    obj.iterative_search()
+
+    # obj = WPCPartsNames(df, visible=True)
+    # obj.log_in()
