@@ -18,7 +18,6 @@ from utils.functions import update_chromedriver
 
 class WPCPartsNames:
     def __init__(self, df, visible=False):
-        # self.df = df
         self.df_part_list = df['Part No'].tolist()
         self.wpc_dict = self.load_wpcdict()
         GC_DRIVER = 'driver/chromedriver.exe'
@@ -55,6 +54,7 @@ class WPCPartsNames:
         WebDriverWait(self.driver, 3).until(EC.element_to_be_clickable(
             (By.XPATH, "/html/body/div[2]/div/div[1]/div[1]/table/tbody/tr/td[7]/div/img")))
         print("Logged in Successfully")
+        time.sleep(1)
 
     def search_part_info(self, partnumbers):
         search_url = "https://wpc.mobis.co.kr/Parts?cmd=getPartsList2&ptno=" + partnumbers + \
@@ -72,18 +72,23 @@ class WPCPartsNames:
             n += 1
 
             if i in self.wpc_dict.keys():
-                if self.wpc_dict[i] != '__no_result__':
-                    continue
-                else:
-                    i = i[:slice]
+                continue
             info = self.search_part_info(i)
             try:
                 self.wpc_dict[i] = info[0][3]
             except IndexError:
-                self.wpc_dict[i] = '__no_result__'
-            # print(i, self.wpc_dict[i])
+                j = i[:slice]
+
+                if j in self.wpc_dict.keys():
+                    continue
+                info = self.search_part_info(j)
+                try:
+                    self.wpc_dict[j] = info[0][3]
+                except IndexError:
+                    pass
+
             if n % 20 == 0:
-                time.sleep(0.5)
+                time.sleep(0.1)
                 self.save_wpcdict()
         self.save_wpcdict()
 
@@ -124,15 +129,15 @@ def master_data():
 
 if __name__ == "__main__":
     os.chdir(os.pardir)
-    df1 = dom_data()
+    # df1 = dom_data()
     # df2 = exp_data()
-    # df3 = master_data()
+    df3 = master_data()
     # update_chromedriver()
 
     for df in [
-        df1,
+        # df1,
         # df2,
-        # df3
+        df3
     ]:
         try:
             obj = WPCPartsNames(df, visible=False)

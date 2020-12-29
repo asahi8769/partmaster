@@ -208,7 +208,7 @@ if __name__ == "__main__":
     classifier_dict, keylist = part_type_3_dict()
     df = partsys_3_search(df)
     wpc_dict = load_wpcdict()
-    print(wpc_dict)
+    # print(wpc_dict)
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
         df_1 = pd.read_excel(file, sheet_name='부품체계1')
@@ -217,9 +217,12 @@ if __name__ == "__main__":
     partsys_2_dict = {str(p): df_2['부품구분'].tolist()[n] for n, p in enumerate(df_2['품번'].tolist())}
     df['부품체계_1'] = [partsys_1_dict.get(i[0], '') for i in df['Part No'].tolist()]
     df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
-    df['wpc'] = [wpc_dict.get(i, '') for i in df['Part No'].tolist()]
+    df['wpc_10'] = [wpc_dict.get(i, "") for i in df['Part No'].tolist()]
+    df['wpc_6'] = [wpc_dict.get(i[:6], "") for i in df['Part No'].tolist()]
+    # print(wpc_dict['0K2KB688H1'])
 
-    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '부품체계_4', '사정결과', '부품체계_1', '부품체계_2', 'wpc']]
+    df = df[['Part No', '부품명', '품명단어', '기준1', '기준2', '부품체계_3', '부품체계_4', '사정결과', '부품체계_1', '부품체계_2',
+             'wpc_10', 'wpc_6']]
 
     filename = "품목구분결과_test"
     with pd.ExcelWriter(rf'files\spawn\{filename}.xlsx') as writer:

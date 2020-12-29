@@ -102,11 +102,6 @@ def remove_duplication(ls):
 
 
 def update_chromedriver(browserVersion=None):
-
-    # proxies = {"http": "http://85.237.57.198:44959",
-    #            "https" : "http://116.0.2.94:43379"}
-
-
     if browserVersion is None:
         browserVersion = input("Type your current chrome version(ex.87) :")
     url_versions = "https://chromedriver.chromium.org/downloads"
@@ -122,6 +117,3 @@ def update_chromedriver(browserVersion=None):
     with ZipFile(BytesIO(response.content), 'r') as zipObj:
         zipObj.extract("chromedriver.exe", path="driver", pwd=None)
     print("Chromedriver is successfully replaced")
-
-# if __name__ == "__main__":
-#     update_chromedriver(browserVersion=83)

@@ -3,6 +3,7 @@
 \venv*/
 __pycache__
 \clone_*/
+driver/
 files/*
 !files/spawn
 !files/models
