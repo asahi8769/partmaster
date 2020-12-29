@@ -199,8 +199,8 @@ if __name__ == "__main__":
         return df
 
     # df = master_data()
-    # df = dom_data()
-    df = exp_data()
+    df = dom_data()
+    # df = exp_data()
     df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
     df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
     df.drop_duplicates(subset="Part No", keep='first', inplace=True)

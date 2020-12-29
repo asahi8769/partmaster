@@ -66,20 +66,22 @@ class WPCPartsNames:
         text = re.sub("[\\\\]", ",", text)
         return [j for j in [i.split(",") for i in text.split(",^")] if j[0] is not '']
 
-    def iterative_search(self):
+    def iterative_search(self, slice=6):
         n = 0
         for i in tqdm(self.df_part_list):
             n += 1
+
             if i in self.wpc_dict.keys():
-                # print(f"{i} is already registered. {self.wpc_dict[i]}")
-                continue
+                if self.wpc_dict[i] != '__no_result__':
+                    continue
+                else:
+                    i = i[:slice]
             info = self.search_part_info(i)
             try:
-                # print(i[:10], info[0][3])
                 self.wpc_dict[i] = info[0][3]
             except IndexError:
-                # print(i[:10], info)
                 self.wpc_dict[i] = '__no_result__'
+            # print(i, self.wpc_dict[i])
             if n % 20 == 0:
                 time.sleep(0.5)
                 self.save_wpcdict()
