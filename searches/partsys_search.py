@@ -208,6 +208,7 @@ if __name__ == "__main__":
     classifier_dict, keylist = part_type_3_dict()
     df = partsys_3_search(df)
     wpc_dict = load_wpcdict()
+    print(wpc_dict)
 
     with open('files/품목구분기준.xlsx', 'rb') as file:
         df_1 = pd.read_excel(file, sheet_name='부품체계1')

@@ -3,6 +3,9 @@ from subprocess import Popen, PIPE
 from os.path import basename
 from zipfile import ZipFile
 from functools import reduce
+import requests
+from lxml import html
+from io import BytesIO
 
 
 def make_dir(dirname):
@@ -96,3 +99,29 @@ def remove_duplication(ls):
     seen = set()
     seen_add = seen.add
     return [i for i in ls if not (i in seen or seen_add(i))]
+
+
+def update_chromedriver(browserVersion=None):
+
+    # proxies = {"http": "http://85.237.57.198:44959",
+    #            "https" : "http://116.0.2.94:43379"}
+
+
+    if browserVersion is None:
+        browserVersion = input("Type your current chrome version(ex.87) :")
+    url_versions = "https://chromedriver.chromium.org/downloads"
+    response = requests.get(url_versions, verify=False)
+    webpage = html.fromstring(response.content)
+    links = [i for i in webpage.xpath('//a/@href') if
+             "https://chromedriver.storage.googleapis.com/index.html?path=" + str(browserVersion) in i]
+    version = links[0].split("=")[1][:-1]
+    print(f"Downloading Chromedriver version {version}")
+    url = "https://chromedriver.storage.googleapis.com/"+version+"/chromedriver_win32.zip"
+    response = requests.get(url, verify=False)
+    print(response.status_code)
+    with ZipFile(BytesIO(response.content), 'r') as zipObj:
+        zipObj.extract("chromedriver.exe", path="driver", pwd=None)
+    print("Chromedriver is successfully replaced")
+
+# if __name__ == "__main__":
+#     update_chromedriver(browserVersion=83)
