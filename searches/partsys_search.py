@@ -27,12 +27,12 @@ def preprocess(df, namelist):
                      'RIO', 'TUCSON', 'SOLATI', 'KD', 'ASM', 'TL/QL', 'CEED', 'FORTE', 'LIMITED', 'CRETA', 'SANTAFE',
                      'SOLARIS', 'ELANTRA', 'COMPT', 'FR', 'RR', 'FRONT', 'FRT', 'REAR', 'COMPLT', "NX", "SC", "IQP", "LSU",
                      "SLZ", "IP", "FT", "PE", "GB", "YP", "TRK", "BUS", "SR", "YD", "QZC", "LM", "SX", "LX", "ON", "OFF",
-                     "ND"]
+                     "ND", "JFA", "IX", "HTD", "KUMHO", "ETR", "EVGT", "SILZKR", "LZKR", "LNT", "SULEV", "ON/LX"]
 
     for n, i in enumerate(namelist):
         name = i.replace("O-R", "OR").replace(" & ", "&").replace("O2", "OXYGEN").replace("'", "").replace(
             "’", "").replace("`", "").replace(".", "").replace("RR VIEW", "BACK VIEW").replace("FR VIEW", "FRVIEW")
-        name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', name)
+        name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_/)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', name)
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
 
@@ -201,8 +201,8 @@ if __name__ == "__main__":
         return df
 
     # df = master_data()
-    # df = dom_data()
-    df = exp_data()
+    df = dom_data()
+    # df = exp_data()
     df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
     df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
     df.drop_duplicates(subset="Part No", keep='first', inplace=True)

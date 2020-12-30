@@ -40,7 +40,9 @@ words = [i for i in name.split(' ') if i not in partnames and len(i) > 1]
 #
 # print("HDL-RR DR O/S,LH".replace("RR", ""))
 
-i = "CV-TRIM ASSY-CTR PILLAR UPR,RH  -  SUB PART PROBLEM"
+i = "FRM 2ND/B RH 5P 17MYM"
 
-name = i.replace("SUB PART PROBLEM", "SUBPART").replace("PARTS", "PART")
+name = re.sub("(NO)(\.)[0-9]+|[0-9][A-Z]{2}($|[\s,.\-_/)])|[0-9\xa0\u3000\n?!\-+_,()=]", ' ', i)
+
+# name = i.replace("SUB PART PROBLEM", "SUBPART").replace("PARTS", "PART")
 print(name)
