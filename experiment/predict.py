@@ -8,9 +8,9 @@ from experiment.config import *
 
 
 class PredictionOnData:
-    def __init__(self, df, model):
+    def __init__(self, df, model, allow_spawn=False):
         self.model = model
-        # self.file_path = file_path
+        self.allow_spawn = allow_spawn
         self.spawn_path = 'files\spawn\experiment_data_predicted.csv'
         self.encoder = self.load_encoder()
         self.tar_dict = self.load_tardict()
@@ -59,7 +59,8 @@ class PredictionOnData:
                 result = self.model(sent_idx.to(self.model.device))
                 predicts[n] = self.tar_dict[int(torch.argmax(result, dim=1))]
         self.df['제목_정리'] = predicts
-        self.spawn()
+        if self.allow_spawn:
+            self.spawn()
         return self.df
 
 
@@ -86,4 +87,4 @@ if __name__ == "__main__":
     # df = learning_data()
 
     model = CNNModel(n_vocab=n_vocab, n_embedding=n_embedding, n_outputs=n_outputs, seed=0)
-    df = PredictionOnData(df=df, model=model).encode()
+    df = PredictionOnData(df=df, model=model, allow_spawn=True).encode()

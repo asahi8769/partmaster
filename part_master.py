@@ -11,7 +11,6 @@ from experiment.config import *
 from experiment.CNN import CNNModel
 
 
-
 class DomeMaster:
     warnings.filterwarnings('ignore')
     master_col = ['고객사', '차종', 'Part No', '부품명', '단위', '포장장', '납품업체', '납품업체명', '부품로트 대상여부']
@@ -192,7 +191,7 @@ class DomeMaster:
         # types = sorted(standardized_map.keys(), key=standardized_map.get, reverse=True)
         # types = [i for i in types if i in APPEARANCE_DICT.keys()]
         with open(file_path, 'rb') as file:
-            sys_df = pd.read_excel(file, sheet_name="쳬계")
+            sys_df = pd.read_excel(file, sheet_name="체계")
             types_forvision = sys_df[sys_df['비전검사대상'] == "○"]['불량명']
 
         temp_df = df.groupby(['Part No', "제목_정리"]).size().reset_index(name="freq")
