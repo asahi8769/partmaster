@@ -25,11 +25,11 @@ class DomeMaster:
         if self.type == 'dom':
             self.dom_insp_df = MasterDBStorage('입고불량이력', append_from_file=True).df
             self.dom_insp_df['Part No'] = [i.replace(" ", "") for i in self.dom_insp_df['Part No'].tolist()]
-            # self.dom_insp_df['제목_정리'] = self.prob_specify(self.dom_insp_df)
+            self.dom_insp_df = self.prob_specify(self.dom_insp_df)
         if self.type == 'exp':
             self.exp_insp_df = MasterDBStorage('해외불량이력', append_from_file=True).df
             self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
-            self.prob_specify(self.exp_insp_df)
+            self.exp_insp_df = self.prob_specify(self.exp_insp_df)
 
         self.in_business_df = MasterDBStorage('매입대', append_from_file=True).df
         self.part_sys_2_df = MasterDBStorage('품번체계', append_from_file=True).df
@@ -182,31 +182,9 @@ class DomeMaster:
     def prob_specify(self, df):
         model = CNNModel(n_vocab=n_vocab, n_embedding=n_embedding, n_outputs=n_outputs, seed=0)
         df = PredictionOnData(df=df, model=model).encode()
-
-        # problems = df["불량구분"].tolist()
-        # titles = df["제목"].tolist()
-        # titles_rewritten = ["" for _ in range(len(titles))]
-        #
-        # remainings = []
-        # for n, t in enumerate([t.upper() for t in titles]):
-        #     for key in APPEARANCE_DICT.keys():
-        #         if titles_rewritten[n] == "":
-        #             for word in APPEARANCE_DICT[key]:
-        #                 if word in t:
-        #                     titles_rewritten[n] = key
-        #                     break
-        #     if titles_rewritten[n] == "":
-        #         remainings.append(t)
-
         titles_rewritten = df["제목_정리"].tolist()
-
-        standardized_map = Counter(titles_rewritten)
-
-        # print(remainings)
-        # print(standardized_map)
-        # print(standardized_map[""] / len(titles_rewritten) * 100, "%")
-
-        # return [problems[n] if problems[n] in ['기능', '치수', '포장', '이종'] and t == "" else t for n, t in enumerate(titles_rewritten)]
+        print(Counter(titles_rewritten))
+        return df
 
     @show_elapsed_time
     def appearance_type(self, df):
@@ -250,21 +228,20 @@ class DomeMaster:
         obj.packaging_spec_information()
         obj.inspection_binary()
         obj.business_binary()
-
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3_4(obj.master_df)
         obj.master_filter()
-        #
-        # if obj.type == 'dom':
-        #     obj.dom_prob_type()
-        #     obj.dom_frequency()
-        #     obj.dom_amount()
-        #     obj.appearance_type(obj.dom_insp_df)
-        #     obj.part_type_1_2(obj.dom_insp_df)
-        #     obj.part_type_3_4(obj.dom_insp_df)
-        #
-        #     obj.spawn(obj.dom_insp_df, obj.type)
-        #
+
+        if obj.type == 'dom':
+            obj.dom_prob_type()
+            obj.dom_frequency()
+            obj.dom_amount()
+            obj.appearance_type(obj.dom_insp_df)
+            # obj.part_type_1_2(obj.dom_insp_df)
+            # obj.part_type_3_4(obj.dom_insp_df)
+
+            obj.spawn(obj.dom_insp_df, obj.type)
+
         if obj.type == 'exp':
             obj.exp_prob_type()
             obj.exp_frequency()
