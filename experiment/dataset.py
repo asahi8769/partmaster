@@ -7,6 +7,7 @@ import torch, os, pickle, re
 from utils.functions import flatten, remove_duplication
 from experiment.config import *
 from collections import Counter
+from master_db import MasterDBStorage
 
 
 class Dataset:
@@ -36,6 +37,7 @@ class Dataset:
             self.spawn()
         else:
             self.encode_dataset()
+            print("Total Vocabs: ", len(self.text.vocab.stoi))
 
     @show_elapsed_time
     def get_dataframe(self):
@@ -57,7 +59,6 @@ class Dataset:
             pickle.dump(self.text.vocab.stoi, f)
         with open('files/spawn/decoder.pkl', 'wb') as f:
             pickle.dump(self.text.vocab.itos, f)
-        # print(self.text.vocab.stoi)
 
     @show_elapsed_time
     def save_target_encoder(self):
@@ -165,9 +166,8 @@ def preprocess(df, for_train=True):
     print("Filtering :", len(words_to_skip))
 
     word_list = []
-    titles = [i.upper() for i in df['제목'].tolist()]
+    titles = [str(i).upper() for i in df['제목'].tolist()]
     for title in titles:
-        # print(title)
 
         name = title.replace("SUB-PART", "SUBPART").replace("SUB PART", "SUBPART").replace(
             "SUB PART PROBLEM", "SUBPART").replace("PARTS", "PART").replace("으로", "").replace(
@@ -176,17 +176,10 @@ def preprocess(df, for_train=True):
             "갭", "GAP").replace("WELDING/PRESS", "웰딩/프레스").replace("WELD LINE", "WELDLINE").replace(
             "홀", "HOLE").replace("BAR CODE", "BARCODE").replace("버", "BURR")
 
-        name = re.sub("(NO)(\.)[0-9\s]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9]|[\W]", ' ', name)
+        name = re.sub("(NO)(\.)[0-9\s]+|[0-9][A-Z]{2}($|[\s,.\-_)])|[0-9_,]|[\W]", ' ', name)
 
         words = [i for i in name.split(' ') if i not in words_to_skip and len(i) > 1]
         word_list.append(words)
-
-        if title == "[HC]PNL ASSY-UNDER COVER - 버 불량(입고검사)":
-            print(title)
-            print(name)
-            print(words)
-            print(word_list)
-
 
     df['정리'] = [' '.join(i) for i in word_list]
     df['data'] = df['정리'] + ' ' + df['부품체계_1'] + ' ' + df['부품체계_2'] + ' ' + df['부품체계_3']
@@ -216,22 +209,22 @@ def partsys(df):
 
 
 if __name__ == "__main__":
-    from master_db import MasterDBStorage
-    os.chdir(os.pardir)
-
-
-    def dom_data():
-        df = MasterDBStorage('입고불량이력', append_from_file=True).df
-        df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
-        df.fillna("", inplace=True)
-        return df
-
-    df = partsys(dom_data())
-    df = preprocess(df, for_train=False)
-    df[['제목', '정리', '부품체계_1', '부품체계_2', '부품체계_3', 'data']].to_csv('files\spawn\dom_experiment_data.csv', index=False, encoding='utf-8-sig')
-    os.startfile('files\spawn\dom_experiment_data.csv')
-
+    # from master_db import MasterDBStorage
     # os.chdir(os.pardir)
-    # data = Dataset(file_path='files/불량유형수기정리_v2.xlsx', update_csv=True)
+    #
+    #
+    # def dom_data():
+    #     df = MasterDBStorage('입고불량이력', append_from_file=True).df
+    #     df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
+    #     df.fillna("", inplace=True)
+    #     return df
+    #
+    # df = partsys(dom_data())
+    # df = preprocess(df, for_train=False)
+    # df[['제목', '정리', '부품체계_1', '부품체계_2', '부품체계_3', 'data']].to_csv('files\spawn\dom_experiment_data.csv', index=False, encoding='utf-8-sig')
+    # os.startfile('files\spawn\dom_experiment_data.csv')
+
+    os.chdir(os.pardir)
+    data = Dataset(file_path=file_path, update_csv=True)
 
 

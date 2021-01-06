@@ -1,8 +1,9 @@
-file_path = 'files/불량유형수기정리_v2.xlsx'
+# file_path = 'files/불량유형수기정리_v2.xlsx'
+file_path = 'files/불량유형수기정리_v2_updated.xlsx'
 
-n_vocab = 800
+n_vocab = 1200
 n_embedding = 128
-n_outputs = 81
+n_outputs = 80
 
 split_ratio = 0.8
 batch_sizes = (16, 256)
