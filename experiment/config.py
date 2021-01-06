@@ -1,5 +1,5 @@
 # file_path = 'files/불량유형수기정리_v2.xlsx'
-file_path = 'files/불량유형수기정리_v2_updated.xlsx'
+file_path = 'files/불량유형수기정리_v3.xlsx'
 
 n_vocab = 1200
 n_embedding = 128
