@@ -10,7 +10,7 @@ from problem_search.config import *
 from problem_search.CNN import CNNModel
 
 
-class DomeMaster:
+class Master:
     warnings.filterwarnings('ignore')
     master_col = ['고객사', '차종', 'Part No', '부품명', '단위', '포장장', '납품업체', '납품업체명', '부품로트 대상여부']
 
@@ -204,6 +204,7 @@ class DomeMaster:
         obj.business_binary()
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3_4(obj.master_df)
+        # obj.spawn(obj.master_df)
 
         if obj.type == 'dom':
             obj.dom_prob_type()
@@ -211,7 +212,8 @@ class DomeMaster:
             obj.dom_amount()
             obj.prob_specify(obj.dom_insp_df)
             obj.appearance_type(obj.dom_insp_df)
-            obj.spawn(obj.dom_insp_df, obj.type)
+            # obj.spawn(obj.dom_insp_df, obj.type)
+            return obj.master_df, obj.dom_insp_df
 
         if obj.type == 'exp':
             obj.exp_prob_type()
@@ -219,9 +221,9 @@ class DomeMaster:
             obj.exp_amount()
             obj.prob_specify(obj.exp_insp_df)
             obj.appearance_type(obj.exp_insp_df)
-            obj.spawn(obj.exp_insp_df, obj.type)
+            # obj.spawn(obj.exp_insp_df, obj.type)
+            return obj.master_df, obj.exp_insp_df
 
-        obj.spawn(obj.master_df)
 
     @show_elapsed_time
     def spawn(self, df, name='master'):
@@ -236,7 +238,13 @@ class DomeMaster:
 
 
 if __name__ == "__main__":
-    DomeMaster.run(d_type='exp')
-    # DomeMaster.run(d_type='dom')
-    # RankFilter('dom')
-    # MasterDBStorage.run(table_name, df=df)
+    from rankings import RankFilter
+    d_type = 'exp'
+    df_master, df_aux = Master.run(d_type=d_type)
+    grouped_df_1, grouped_df_3 = RankFilter('exp').grouping()
+
+    with pd.ExcelWriter(rf'files\spawn\{d_type}_부품선정.xlsx') as writer:
+        df_master.to_excel(writer, sheet_name=f'master+{d_type}', index=False)
+        df_aux.to_excel(writer, sheet_name=f'{d_type}_raw', index=False)
+        grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
+        grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
