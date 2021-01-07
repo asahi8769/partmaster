@@ -16,7 +16,6 @@ class RankFilter:
         print('Remaining Parts Before Filtering :', len(self.master_df))
         self.master_filter()
         print('Remaining Parts After Filtering :', len(self.master_df))
-        # self.grouping()
 
     @show_elapsed_time
     def master_filter(self):
@@ -44,10 +43,7 @@ class RankFilter:
         grouped_df_1 = self.col_sum(criterion_list, '기준1')
         grouped_df_3 = self.col_sum(criterion_list, '부품체계_3')
 
-        # with pd.ExcelWriter(self.spawn_name) as writer:
-        #     grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
-        #     grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
-        # os.startfile(self.spawn_name)
+
         return grouped_df_1, grouped_df_3
 
     def col_sum(self, grounp, col):
@@ -66,5 +62,11 @@ class RankFilter:
 
 
 if __name__ == "__main__":
-    # RankFilter('dom')
-    RankFilter('exp')
+
+    d_type = 'exp'
+    grouped_df_1, grouped_df_3 = RankFilter(d_type).grouping()
+
+    with pd.ExcelWriter(rf'files\spawn\{d_type}_ranking.xlsx') as writer:
+        grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
+        grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
+    os.startfile(rf'files\spawn\{d_type}_ranking.xlsx')

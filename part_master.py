@@ -8,6 +8,7 @@ from part_search.partsys_search import partsys_3_search
 from problem_search.predict import PredictionOnData
 from problem_search.config import *
 from problem_search.CNN import CNNModel
+from rankings import RankFilter
 
 
 class Master:
@@ -204,7 +205,7 @@ class Master:
         obj.business_binary()
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3_4(obj.master_df)
-        # obj.spawn(obj.master_df)
+        obj.update_db(obj.master_df, df_name='master')
 
         if obj.type == 'dom':
             obj.dom_prob_type()
@@ -212,7 +213,6 @@ class Master:
             obj.dom_amount()
             obj.prob_specify(obj.dom_insp_df)
             obj.appearance_type(obj.dom_insp_df)
-            # obj.spawn(obj.dom_insp_df, obj.type)
             return obj.master_df, obj.dom_insp_df
 
         if obj.type == 'exp':
@@ -221,24 +221,20 @@ class Master:
             obj.exp_amount()
             obj.prob_specify(obj.exp_insp_df)
             obj.appearance_type(obj.exp_insp_df)
-            # obj.spawn(obj.exp_insp_df, obj.type)
             return obj.master_df, obj.exp_insp_df
 
 
     @show_elapsed_time
-    def spawn(self, df, name='master'):
-        if name == 'master':
-            name = name+'_'+self.type
-        filename = rf'files\spawn\{name}_spawn.xlsx'
-        with pd.ExcelWriter(rf'files\spawn\{name}_spawn.xlsx') as writer:
-            df.to_excel(writer, sheet_name='결과', index=False)
-        os.startfile(filename)
-        table_name = f'{name}_spawn'
+    def update_db(self, df, df_name='master'):
+        if df_name == 'master':
+            table_name = df_name + '_' + self.type + '_spawn'
+        else :
+            table_name = self.type + '_spawn'
         MasterDBStorage.run(table_name, df=df)
 
 
 if __name__ == "__main__":
-    from rankings import RankFilter
+
     d_type = 'exp'
     df_master, df_aux = Master.run(d_type=d_type)
     grouped_df_1, grouped_df_3 = RankFilter('exp').grouping()
@@ -248,3 +244,4 @@ if __name__ == "__main__":
         df_aux.to_excel(writer, sheet_name=f'{d_type}_raw', index=False)
         grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
         grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
+    os.startfile(rf'files\spawn\{d_type}_부품선정.xlsx')
