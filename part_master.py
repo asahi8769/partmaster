@@ -1,14 +1,13 @@
 from master_db import MasterDBStorage
-from rankings import RankFilter
 from utils.functions import show_elapsed_time
 import pandas as pd
 import warnings, os
 from collections import Counter
-from utils.config import APPEARANCE_DICT, PACKAGING_CENTER
-from searches.partsys_search import partsys_3_search
-from experiment.predict import PredictionOnData
-from experiment.config import *
-from experiment.CNN import CNNModel
+from utils.config import PACKAGING_CENTER
+from part_search.partsys_search import partsys_3_search
+from problem_search.predict import PredictionOnData
+from problem_search.config import *
+from problem_search.CNN import CNNModel
 
 
 class DomeMaster:
@@ -24,33 +23,14 @@ class DomeMaster:
         if self.type == 'dom':
             self.dom_insp_df = MasterDBStorage('입고불량이력', append_from_file=True).df
             self.dom_insp_df['Part No'] = [i.replace(" ", "") for i in self.dom_insp_df['Part No'].tolist()]
-            self.dom_insp_df = self.prob_specify(self.dom_insp_df)
         if self.type == 'exp':
             self.exp_insp_df = MasterDBStorage('해외불량이력', append_from_file=True).df
             self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
-            self.exp_insp_df = self.prob_specify(self.exp_insp_df)
 
         self.in_business_df = MasterDBStorage('매입대', append_from_file=True).df
         self.part_sys_2_df = MasterDBStorage('품번체계', append_from_file=True).df
         self.packingspect_df = MasterDBStorage('전차종포장사양서', append_from_file=True).df
         self.spawn_name = rf'files\spawn\{self.type}_spawn.xlsx'
-
-    @show_elapsed_time
-    def master_filter(self):
-        self.master_df['최종입고일'] = [0 if i == "" else int(i) for i in self.master_df['최종입고일'].tolist()]
-        self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
-
-        self.filters = (
-                (self.master_df['최종입고일'] >= 20200601)
-                & (self.master_df['단중'] <= 4000)
-                & (self.master_df['단중'] > 0)
-                # & (self.master_df['업체포장여부'] != 1)
-                & (self.master_df['중점검사표유무'] == 1)
-                & (self.master_df['거래지속여부'] == 1)
-                & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P')) | (
-                    self.master_df['포장장명'] == '아산3포장장'))
-        )
-        self.master_df = self.master_df[self.filters]
 
     @show_elapsed_time
     def packaging_spec_information(self):
@@ -71,13 +51,11 @@ class DomeMaster:
         weight_dict = dict(zip(part_list, self.packingspect_df['단중'].tolist()))
         supplier_packing_dict = dict(zip(part_list, supplier_packing_list))
         middle_box_code_dict = dict(zip(part_list, middle_box_code_list))
-        # print(middle_box_code_dict)
 
         self.master_df['최종입고일'] = [imcomming_date_dict.get(i, '') for i in self.master_df['Part No'].tolist()]
         self.master_df['단중'] = [weight_dict.get(i, '') for i in self.master_df['Part No'].tolist()]
         self.master_df['업체포장여부'] = [supplier_packing_dict.get(i, '') for i in self.master_df['Part No'].tolist()]
         self.master_df['중박스코드'] = [middle_box_code_dict.get(i, '') for i in self.master_df['Part No'].tolist()]
-        # print(self.master_df.columns)
 
     @show_elapsed_time
     def packaging_center(self):
@@ -183,16 +161,13 @@ class DomeMaster:
         df = PredictionOnData(df=df, model=model).encode()
         titles_rewritten = df["제목_정리"].tolist()
         print(Counter(titles_rewritten))
-        return df
+        # return df
 
     @show_elapsed_time
     def appearance_type(self, df):
-        standardized_map = Counter(df['제목_정리'].tolist())
-        # types = sorted(standardized_map.keys(), key=standardized_map.get, reverse=True)
-        # types = [i for i in types if i in APPEARANCE_DICT.keys()]
         with open(file_path, 'rb') as file:
             sys_df = pd.read_excel(file, sheet_name="체계")
-            types_forvision = sys_df[sys_df['비전검사대상'] == "○"]['불량명']
+            types_forvision = sys_df[sys_df['비전검사대상'] == "○"]['불량명'].tolist()
 
         temp_df = df.groupby(['Part No', "제목_정리"]).size().reset_index(name="freq")
         insp_item = temp_df['Part No'].tolist()
@@ -208,7 +183,7 @@ class DomeMaster:
                     count = 0
                 item_dict[i][t] = + count
         for t in types_forvision:
-            self.master_df[f'외관_{t}'] = [item_dict.get(i, {t: 0 for t in types_forvision})[t] for i in
+            self.master_df[f'비전_{t}'] = [item_dict.get(i, {t: 0 for t in types_forvision})[t] for i in
                                          self.master_df['Part No'].tolist()]
 
         item_dict_2 = {i : list() for i in df['Part No']}
@@ -217,8 +192,8 @@ class DomeMaster:
             if t in types_forvision and t not in item_dict_2[i]:
                 item_dict_2[i].append(t)
 
-        self.master_df['_외관불량상세'] = [','.join(i) if type(i) == list else i for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
-        self.master_df['_외관불량유형수'] = [len(i) if type(i) == list else 0 for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
+        self.master_df['_비전가능불량상세'] = [','.join(i) if type(i) == list else i for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
+        self.master_df['_비전가능불량유형수'] = [len(i) if type(i) == list else 0 for i in [item_dict_2.get(i, "") for i in self.master_df['Part No'].tolist()]]
 
     @classmethod
     def run(cls, d_type='exp'):
@@ -229,26 +204,21 @@ class DomeMaster:
         obj.business_binary()
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3_4(obj.master_df)
-        obj.master_filter()
 
         if obj.type == 'dom':
             obj.dom_prob_type()
             obj.dom_frequency()
             obj.dom_amount()
+            obj.prob_specify(obj.dom_insp_df)
             obj.appearance_type(obj.dom_insp_df)
-            # obj.part_type_1_2(obj.dom_insp_df)
-            # obj.part_type_3_4(obj.dom_insp_df)
-
             obj.spawn(obj.dom_insp_df, obj.type)
 
         if obj.type == 'exp':
             obj.exp_prob_type()
             obj.exp_frequency()
             obj.exp_amount()
+            obj.prob_specify(obj.exp_insp_df)
             obj.appearance_type(obj.exp_insp_df)
-        #     obj.part_type_1_2(obj.exp_insp_df)
-        #     obj.part_type_3_4(obj.exp_insp_df)
-        #
             obj.spawn(obj.exp_insp_df, obj.type)
 
         obj.spawn(obj.master_df)
