@@ -60,6 +60,7 @@ class RankFilter:
 
         df['_비전가능불량유형수'] = num_class
         df['_비전가능불량건수'] = df[grounp].sum(axis=1)
+        df = df.sort_values(["_비전가능불량유형수", "_비전가능불량건수"], ascending=(False, False))
         return df
 
 
