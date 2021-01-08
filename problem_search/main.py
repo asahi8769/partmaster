@@ -8,7 +8,7 @@ from problem_search.config import *
 os.chdir(os.pardir)
 
 model = CNNModel(n_vocab=n_vocab, n_embedding=n_embedding, n_outputs=n_outputs, seed=0)
-# model.load_checkpoint()
+model.load_checkpoint()
 
 data = Dataset(file_path=file_path, update_csv=False)
 train_iter, test_iter = data.get_iter(batch_sizes=(32, 256))
@@ -18,7 +18,7 @@ trainer.plot_result()
 
 
 sentence1 = 'WRONG SPEC PROBLEM POWER TRAIN & CHASSIS-ETC AUTOMATIC T/M OVER DRIVER 노브&부트'  # 이종
-sentence2 = 'MALFUNCTION PROBLEM POWER TRAIN & CHASSIS-ETC AUTOMATIC T/M OVER DRIVER 노브&부트'  # 작동불량
+sentence2 = 'MALFUNCTION PROBLEM POWER TRAIN & CHASSIS-ETC AUTOUI-CL-011MATIC T/M OVER DRIVER 노브&부트'  # 작동불량
 sentence3 = 'SCRATCHES SEALANT TORQUE PROBLEM MISS EXCESS PAINT LEAK ENGINE CYLINDER BLOCK 팬_오일'  # 스크래치
 
 with open('files/spawn/tar_decoder.pkl', 'rb') as file:

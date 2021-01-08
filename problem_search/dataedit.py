@@ -38,6 +38,3 @@ if __name__ == "__main__":
     df = df_edit('exp')
 
     spawn(df)
-
-
-    # print(df)

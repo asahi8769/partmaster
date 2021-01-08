@@ -3,7 +3,7 @@ from problem_search.filters import prob_words_not_to_skip, prob_additional_excep
 from part_search.partsys_search import partsys_3_search
 from utils.functions import show_elapsed_time
 import torchtext.data as ttd
-import torch, os, pickle, re
+import torch, os, pickle, re, random
 from utils.functions import flatten, remove_duplication
 from problem_search.config import *
 from collections import Counter
@@ -11,6 +11,8 @@ from master_db import MasterDBStorage
 
 
 class Dataset:
+    random.seed(0)
+
     def __init__(self, file_path, split_ratio=split_ratio, update_csv=False):
         self.split_ratio = split_ratio
         self.tar_tokens = None
@@ -92,7 +94,11 @@ class Dataset:
         self.label = ttd.Field(sequential=False, use_vocab=False, is_target=True)
         self.dataset = ttd.TabularDataset(path=self.spawn_path, format='csv', skip_header=True,
                                           fields=[('data', self.text), ('encoded_target', self.label)])
-        self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio)
+
+        self.train_dataset, self.test_dataset = self.dataset.split(split_ratio=self.split_ratio,
+                                                                   stratified=True,
+                                                                   strata_field='encoded_target',
+                                                                   random_state=random.getstate())
 
         self.text.build_vocab(self.dataset, min_freq=3, max_size=n_vocab)
         self.save_encoder_decoder()

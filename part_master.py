@@ -226,8 +226,6 @@ class Master:
             obj.update_db(obj.master_df, df_name='master')
             return obj.master_df, obj.exp_insp_df
 
-
-
     @show_elapsed_time
     def update_db(self, df, df_name='master'):
         if df_name == 'master':
