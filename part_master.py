@@ -205,13 +205,15 @@ class Master:
         obj.business_binary()
         obj.master_df = obj.part_type_1_2(obj.master_df)
         obj.master_df = obj.part_type_3_4(obj.master_df)
-        
+
         if obj.type == 'dom':
             obj.dom_prob_type()
             obj.dom_frequency()
             obj.dom_amount()
             obj.prob_specify(obj.dom_insp_df)
             obj.appearance_type(obj.dom_insp_df)
+            obj.update_db(obj.dom_insp_df)
+            obj.update_db(obj.master_df, df_name='master')
             return obj.master_df, obj.dom_insp_df
 
         if obj.type == 'exp':
@@ -220,9 +222,11 @@ class Master:
             obj.exp_amount()
             obj.prob_specify(obj.exp_insp_df)
             obj.appearance_type(obj.exp_insp_df)
+            obj.update_db(obj.exp_insp_df)
+            obj.update_db(obj.master_df, df_name='master')
             return obj.master_df, obj.exp_insp_df
 
-        obj.update_db(obj.master_df, df_name='master')
+
 
     @show_elapsed_time
     def update_db(self, df, df_name='master'):
