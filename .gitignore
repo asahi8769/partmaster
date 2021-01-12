@@ -12,7 +12,7 @@ files/*
 !files/불량유형수기정리_v2.xlsx
 !files/불량유형수기정리_v3.xlsx
 !files/불량구분기준.xlsx
-partsys_test.py
+files/spawn/exp_부품선정.xlsx
 
 
 
