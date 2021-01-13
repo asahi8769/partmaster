@@ -124,7 +124,7 @@ def part_names():
 
 
 def model_names():
-    df = MasterDBStorage('입고불량이력', append_from_file=True).df
+    df = MasterDBStorage('입고불량이력', to_db=True).df
     model_list = remove_duplication(df['차종'].tolist())
     with open('files/spawn/차종리스트.pkl', 'wb') as f:
         pickle.dump(model_list, f)

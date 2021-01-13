@@ -7,13 +7,13 @@ from utils.config import SQL_SCHEMA
 class MasterDBStorage:
     warnings.filterwarnings('ignore')
 
-    def __init__(self, name, append_from_file=False):
+    def __init__(self, name, to_db=False):
         self.table_name = name
         self.excel_name = rf'files\{self.table_name}.xlsx'
         self.db = "master.db"
         self.db_directory = os.path.abspath(rf"files\{self.db}")
 
-        if append_from_file:
+        if to_db:
             try:
                 self.df = self.sql_to_df()
             except Exception as e:
@@ -61,7 +61,7 @@ class MasterDBStorage:
     @classmethod
     @show_elapsed_time
     def db_drop_table(cls, name):
-        obj = cls(name, append_from_file=False)
+        obj = cls(name, to_db=False)
         with sqlite3.connect(obj.db_directory) as conn:
             cursor = conn.cursor()
             cursor.execute(f"DROP table {obj.table_name};")
@@ -73,13 +73,13 @@ class MasterDBStorage:
         except:
             pass
         if df is not None:
-            cls(name, append_from_file=False).df_to_sql(df)
+            cls(name, to_db=False).df_to_sql(df)
         else:
-            cls(name, append_from_file=True)
+            cls(name, to_db=True)
 
 
 if __name__ == "__main__":
-    MasterDBStorage.run('품번체계')
+    MasterDBStorage.run('전차종포장사양서')
 
     # with open('files/해외불량이력.xlsx', 'rb') as file:
     #     master_df = pd.read_excel(file)

@@ -9,7 +9,7 @@ def df_edit(d_type):
     :param d_type: exp, dom
     :return:
     """
-    df = MasterDBStorage(f'{d_type}_spawn', append_from_file=True).df
+    df = MasterDBStorage(f'{d_type}_spawn', to_db=True).df
     df['data'] = ["해외" if d_type == 'exp' else "국내" for _ in range(len(df))]
     df['target_기륜책임님'] = ["" for _ in range(len(df))]
     df['target'] = ["" for _ in range(len(df))]

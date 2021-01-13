@@ -17,20 +17,20 @@ class Master:
 
     def __init__(self, d_type):
         self.type = d_type
-        self.master_df = MasterDBStorage('파트마스터', append_from_file=True).df
+        self.master_df = MasterDBStorage('파트마스터', to_db=True).df
         self.master_df = self.master_df[self.master_col]
-        self.inspection_df = MasterDBStorage('중점검사표', append_from_file=True).df
+        self.inspection_df = MasterDBStorage('중점검사표', to_db=True).df
         self.inspection_df['Part No'] = [i.replace(" ", "") for i in self.inspection_df['Part No'].tolist()]
         if self.type == 'dom':
-            self.dom_insp_df = MasterDBStorage('입고불량이력', append_from_file=True).df
+            self.dom_insp_df = MasterDBStorage('입고불량이력', to_db=True).df
             self.dom_insp_df['Part No'] = [i.replace(" ", "") for i in self.dom_insp_df['Part No'].tolist()]
         if self.type == 'exp':
-            self.exp_insp_df = MasterDBStorage('해외불량이력', append_from_file=True).df
+            self.exp_insp_df = MasterDBStorage('해외불량이력', to_db=True).df
             self.exp_insp_df.rename(columns={'품번': 'Part No', '품명' : '부품명'}, inplace=True)
 
-        self.in_business_df = MasterDBStorage('매입대', append_from_file=True).df
-        self.part_sys_2_df = MasterDBStorage('품번체계', append_from_file=True).df
-        self.packingspect_df = MasterDBStorage('전차종포장사양서', append_from_file=True).df
+        self.in_business_df = MasterDBStorage('매입대', to_db=True).df
+        self.part_sys_2_df = MasterDBStorage('품번체계', to_db=True).df
+        self.packingspect_df = MasterDBStorage('전차종포장사양서', to_db=True).df
         self.spawn_name = rf'files\spawn\{self.type}_spawn.xlsx'
 
     @show_elapsed_time
@@ -237,9 +237,10 @@ class Master:
 
 if __name__ == "__main__":
 
-    d_type = 'exp'
+    # d_type = 'exp'
+    d_type = 'dom'
     df_master, df_aux = Master.run(d_type=d_type)
-    grouped_df_1, grouped_df_3 = RankFilter('exp').grouping()
+    grouped_df_1, grouped_df_3 = RankFilter(d_type).grouping()
 
     with pd.ExcelWriter(rf'files\spawn\{d_type}_부품선정.xlsx') as writer:
         df_master.to_excel(writer, sheet_name=f'master+{d_type}', index=False)

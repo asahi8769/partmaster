@@ -11,7 +11,7 @@ class RankFilter:
     def __init__(self, type):
         table_name = 'master_' + type + '_spawn' # todo : fix this
         self.spawn_name = rf'files\spawn\{type}_ranking.xlsx'
-        self.master_df = MasterDBStorage(table_name, append_from_file=True).df
+        self.master_df = MasterDBStorage(table_name, to_db=True).df
         self.master_df.fillna("", inplace=True)
         print('Remaining Parts Before Filtering :', len(self.master_df))
         self.master_filter()

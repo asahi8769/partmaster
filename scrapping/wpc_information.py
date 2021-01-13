@@ -99,7 +99,7 @@ class WPCPartsNames:
 
 
 def dom_data():
-    df = MasterDBStorage('입고불량이력', append_from_file=True).df
+    df = MasterDBStorage('입고불량이력', to_db=True).df
     df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
     df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
     df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
@@ -108,7 +108,7 @@ def dom_data():
 
 
 def exp_data():
-    df = MasterDBStorage('해외불량이력', append_from_file=True).df
+    df = MasterDBStorage('해외불량이력', to_db=True).df
     df['품명'] = [i.upper() for i in df['품명'].tolist()]
     df.rename(columns={'품번': 'Part No', '품명': '부품명'}, inplace=True)
     df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
@@ -118,7 +118,7 @@ def exp_data():
 
 
 def master_data():
-    df = MasterDBStorage('파트마스터', append_from_file=True).df
+    df = MasterDBStorage('파트마스터', to_db=True).df
     df['부품명'] = [i.upper() for i in df['부품명'].tolist()]
     df['Part No'] = [i.replace(" ", "").replace("-", "") for i in df['Part No'].tolist()]
     df['Part No'] = [i[0:10] for i in df['Part No'].tolist()]
