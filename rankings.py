@@ -13,8 +13,10 @@ class RankFilter:
         self.spawn_name = rf'files\spawn\{type}_ranking.xlsx'
         self.master_df = MasterDBStorage(table_name, to_db=True).df
         self.master_df.fillna("", inplace=True)
+
         print('Remaining Parts Before Filtering :', len(self.master_df))
         self.master_filter()
+        self.master_df.drop_duplicates(subset="Part No", keep=False, inplace=True)
         print('Remaining Parts After Filtering :', len(self.master_df))
 
     @show_elapsed_time
