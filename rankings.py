@@ -10,31 +10,41 @@ class RankFilter:
 
     def __init__(self, type):
         table_name = 'master_' + type + '_spawn' # todo : fix this
+        insp_name = type + '_spawn'
+
         self.spawn_name = rf'files\spawn\{type}_ranking.xlsx'
         self.master_df = MasterDBStorage(table_name, to_db=True).df
         self.master_df.fillna("", inplace=True)
 
-        print('Remaining Parts Before Filtering :', len(self.master_df))
-        self.master_filter()
-        self.master_df.drop_duplicates(subset="Part No", keep=False, inplace=True)
-        print('Remaining Parts After Filtering :', len(self.master_df))
+
+        # print(len(self.master_df))
+        # self.master_df.drop_duplicates(subset="Part No", keep=False, inplace=True)
+        # print(len(self.master_df))
+        self.master_df_trimmed = self.master_filter()
+
+        # self.insp_df = MasterDBStorage(insp_name, to_db=True).df
+        # self.insp_df.fillna("", inplace=True)
 
     @show_elapsed_time
     def master_filter(self):
+        print('Remaining Parts Before Filtering :', len(self.master_df))
+        self.master_df.drop_duplicates(subset="Part No", keep=False, inplace=True)
         self.master_df['최종입고일'] = [0 if i == "" else int(i) for i in self.master_df['최종입고일'].tolist()]
         self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
 
         filters = (
                 (self.master_df['최종입고일'] >= 20200601)
                 & (self.master_df['단중'] <= 4000)
-                & (self.master_df['단중'] > 0)
+                & (0 < self.master_df['단중'])
                 # & (self.master_df['업체포장여부'] != 1)
                 # & (self.master_df['중점검사표유무'] == 1)
                 & (self.master_df['거래지속여부'] == 1)
                 # & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P')) | (
                 # self.master_df['포장장명'] == '아산3포장장'))
         )
-        self.master_df = self.master_df[filters]
+        trimmed = self.master_df[filters]
+        print('Remaining Parts After Filtering :', len(trimmed))
+        return trimmed
 
     @show_elapsed_time
     def grouping(self):
@@ -50,12 +60,25 @@ class RankFilter:
     def col_sum(self, group, col):
         idx = ['부품체계_1', '부품체계_2', col]
         df = self.master_df.groupby(idx)[group].apply(lambda x: x.astype(float).sum()).reset_index()
-        df['품번수'] = self.master_df.groupby(idx).size().reset_index(name='counts')['counts'].tolist()
 
-        col = df.columns.tolist()
-        popped = [col.pop(-1)]
-        col = col[:len(idx)] + popped + col[len(idx):]
-        df = df[col]
+        partcate = df[col].tolist()
+        partcate_1 = df["부품체계_1"].tolist()
+        partcate_2 = df["부품체계_2"].tolist()
+
+        df['비전대상선정'] = ["" for _ in range(len(partcate))]
+        # df['품번수'] = self.master_df_trimmed.groupby(idx).size().reset_index(name='counts')['counts'].tolist()
+
+        df['품번수'] = [len(self.master_df_trimmed[(self.master_df_trimmed[col]==i) &
+                                                  (self.master_df_trimmed["부품체계_1"]== partcate_1[n]) &
+                                                  (self.master_df_trimmed["부품체계_2"] == partcate_2[n])])
+                     for n, i in enumerate(partcate)]
+
+        cols = df.columns.tolist()
+        popped = [cols.pop(-1)]
+        popped_1 = [cols.pop(-1)]
+        # popped_2 = [cols.pop(-1)]
+        cols = cols[:len(idx)] + popped_1+ popped + cols[len(idx):]
+        df = df[cols]
 
         num_class = [0 for _ in range(len(df))]
 
@@ -67,15 +90,21 @@ class RankFilter:
         df['_비전가능불량유형수'] = num_class
         df['_비전가능불량건수'] = df[group].sum(axis=1)
         df = df.sort_values(["_비전가능불량유형수", "_비전가능불량건수"], ascending=(False, False))
+        df = df[df[col] != ""]
         return df
 
 
 if __name__ == "__main__":
 
-    d_type = 'exp'
-    grouped_df_1, grouped_df_3 = RankFilter(d_type).grouping()
+    types = ['exp', 'dom']
 
-    with pd.ExcelWriter(rf'files\spawn\{d_type}_ranking.xlsx') as writer:
-        grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
-        grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
-    os.startfile(rf'files\spawn\{d_type}_ranking.xlsx')
+    for d_type in types:
+        data = RankFilter(d_type)
+        grouped_df_1, grouped_df_3 = data.grouping()
+
+        with pd.ExcelWriter(rf'files\spawn\{d_type}_ranking.xlsx') as writer:
+            data.master_df_trimmed.to_excel(writer, sheet_name='마스터', index=False)
+            grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
+            grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
+
+        os.startfile(rf'files\spawn\{d_type}_ranking.xlsx')
