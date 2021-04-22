@@ -79,7 +79,8 @@ class MasterDBStorage:
 
 
 if __name__ == "__main__":
-    MasterDBStorage.run('전차종포장사양서')
+    # MasterDBStorage.run('전차종포장사양서')
+    MasterDBStorage.run('파트마스터')
 
     # with open('files/해외불량이력.xlsx', 'rb') as file:
     #     master_df = pd.read_excel(file)

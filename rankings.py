@@ -33,14 +33,15 @@ class RankFilter:
         self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
 
         filters = (
-                (self.master_df['최종입고일'] >= 20200601)
-                & (self.master_df['단중'] <= 4000)
+                (self.master_df['최종입고일'] >= 20201101)
+                # & (self.master_df['단중'] <= 4000)
                 & (0 < self.master_df['단중'])
                 # & (self.master_df['업체포장여부'] != 1)
                 # & (self.master_df['중점검사표유무'] == 1)
                 & (self.master_df['거래지속여부'] == 1)
                 # & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P')) | (
                 # self.master_df['포장장명'] == '아산3포장장'))
+                & (self.master_df['포장장명'] == '아산3포장장')
         )
         trimmed = self.master_df[filters]
         print('Remaining Parts After Filtering :', len(trimmed))

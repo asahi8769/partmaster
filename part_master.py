@@ -238,13 +238,14 @@ class Master:
 if __name__ == "__main__":
 
     # d_type = 'exp'
-    d_type = 'dom'
-    df_master, df_aux = Master.run(d_type=d_type)
-    grouped_df_1, grouped_df_3 = RankFilter(d_type).grouping()
+    # d_type = 'dom'
+    for d_type in ['exp', 'dom']:
+        df_master, df_aux = Master.run(d_type=d_type)
+        grouped_df_1, grouped_df_3 = RankFilter(d_type).grouping()
 
-    with pd.ExcelWriter(rf'files\spawn\{d_type}_부품선정.xlsx') as writer:
-        df_master.to_excel(writer, sheet_name=f'master+{d_type}', index=False)
-        df_aux.to_excel(writer, sheet_name=f'{d_type}_raw', index=False)
-        grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
-        grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
-    os.startfile(rf'files\spawn\{d_type}_부품선정.xlsx')
+        with pd.ExcelWriter(rf'files\spawn\{d_type}_부품선정.xlsx') as writer:
+            df_master.to_excel(writer, sheet_name=f'master+{d_type}', index=False)
+            df_aux.to_excel(writer, sheet_name=f'{d_type}_raw', index=False)
+            grouped_df_1.to_excel(writer, sheet_name='대표부품기준', index=False)
+            grouped_df_3.to_excel(writer, sheet_name='부품상세기준', index=False)
+        os.startfile(rf'files\spawn\{d_type}_부품선정.xlsx')
