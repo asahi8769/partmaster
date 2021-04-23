@@ -36,7 +36,7 @@ class RankFilter:
                 (self.master_df['최종입고일'] >= 20201101)
                 # & (self.master_df['단중'] <= 4000)
                 & (0 < self.master_df['단중'])
-                # & (self.master_df['업체포장여부'] != 1)
+                & (self.master_df['업체포장여부'] != 1)
                 # & (self.master_df['중점검사표유무'] == 1)
                 & (self.master_df['거래지속여부'] == 1)
                 # & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P')) | (
