@@ -28,7 +28,7 @@ class RankFilter:
     @show_elapsed_time
     def master_filter(self):
         print('Remaining Parts Before Filtering :', len(self.master_df))
-        self.master_df.drop_duplicates(subset="Part No", keep=False, inplace=True)
+
         self.master_df['최종입고일'] = [0 if i == "" else int(i) for i in self.master_df['최종입고일'].tolist()]
         self.master_df['단중'] = [float(i) if i != '' else 0 for i in self.master_df['단중'].tolist()]
 
@@ -44,6 +44,7 @@ class RankFilter:
                 & (self.master_df['포장장명'] == '아산3포장장')
         )
         trimmed = self.master_df[filters]
+        trimmed.drop_duplicates(subset="Part No", inplace=True)
         print('Remaining Parts After Filtering :', len(trimmed))
         return trimmed
 
