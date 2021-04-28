@@ -2,7 +2,7 @@ import pandas as pd
 import warnings, os
 from utils.functions import show_elapsed_time
 from master_db import MasterDBStorage
-# from utils.functions import remove_duplication
+from flow import IncomingFlow
 
 
 class RankFilter:
@@ -42,6 +42,7 @@ class RankFilter:
                 # & ((self.master_df['포장장명'].str.contains('아산') & self.master_df['중박스코드'].str.startswith('P')) | (
                 # self.master_df['포장장명'] == '아산3포장장'))
                 & (self.master_df['포장장명'] == '아산3포장장')
+                # & (self.master_df['월평균물동량'] != 0)
         )
         trimmed = self.master_df[filters]
         trimmed.drop_duplicates(subset="Part No", inplace=True)
@@ -75,11 +76,14 @@ class RankFilter:
                                                   (self.master_df_trimmed["부품체계_2"] == partcate_2[n])])
                      for n, i in enumerate(partcate)]
 
+        flow_dict = IncomingFlow().pivot_per_partsys(col)
+        df['월평균물동량'] = [int(flow_dict.get(i, 0)/3) for i in df[col]]
+
         cols = df.columns.tolist()
         popped = [cols.pop(-1)]
         popped_1 = [cols.pop(-1)]
-        # popped_2 = [cols.pop(-1)]
-        cols = cols[:len(idx)] + popped_1+ popped + cols[len(idx):]
+        popped_2 = [cols.pop(-1)]
+        cols = cols[:len(idx)] + popped_2 + popped_1 + popped + cols[len(idx):]
         df = df[cols]
 
         num_class = [0 for _ in range(len(df))]
@@ -105,7 +109,7 @@ class RankFilter:
 
 if __name__ == "__main__":
 
-    types = ['exp', 'dom']
+    types = ['dom', 'exp']
 
     for d_type in types:
         data = RankFilter(d_type)

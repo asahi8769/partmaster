@@ -9,6 +9,7 @@ from problem_search.predict import PredictionOnData
 from problem_search.config import *
 from problem_search.CNN import CNNModel
 from rankings import RankFilter
+from flow import IncomingFlow
 
 
 class Master:
@@ -19,6 +20,7 @@ class Master:
         self.type = d_type
         self.master_df = MasterDBStorage('파트마스터', to_db=True).df
         self.master_df = self.master_df[self.master_col]
+        self.flow_dict = IncomingFlow().pivot_per_partnum()
         self.inspection_df = MasterDBStorage('중점검사표', to_db=True).df
         self.inspection_df['Part No'] = [i.replace(" ", "") for i in self.inspection_df['Part No'].tolist()]
         if self.type == 'dom':
@@ -74,9 +76,8 @@ class Master:
         df['부품체계_2'] = [partsys_2_dict.get(i[:2], '') for i in df['Part No'].tolist()]
         return df
 
-    @staticmethod
     @show_elapsed_time
-    def part_type_3_4(df):
+    def part_type_3_4(self, df):
         partsys_3_search(df)
         return df
 
@@ -91,6 +92,7 @@ class Master:
         business_item = set(self.in_business_df['업체코드'].tolist())
         self.master_df['거래지속여부'] = [True if i in business_item else False for i in
                                      self.master_df['납품업체'].tolist()]
+        self.master_df['월평균물동량'] = [int(self.flow_dict.get(i, 0) / 3) for i in self.master_df['Part No'].tolist()]
 
     @show_elapsed_time
     def dom_prob_type(self):
